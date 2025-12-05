@@ -1,0 +1,20 @@
+=== EDP Run Log ===
+开始时间: 2025-12-01 14:18:12
+步骤: pnr_innovus.place
+工作目录: C:\Users\anping.chen\Desktop\EDP_AI\Example\WORK_PATH\dongting\P85\block1\user1\test1
+==================================================
+
+[2025-12-01 14:18:12] [INFO] 开始执行: pnr_innovus.place
+2025-12-01 14:18:12 - edp_center.packages.edp_flowkit.flowkit.command_utils - DEBUG - 创建目录: C:\Users\anping.chen\Desktop\EDP_AI\Example\WORK_PATH\dongting\P85\block1\user1\test1\rpts\pnr_innovus.place
+2025-12-01 14:18:12 - edp_center.packages.edp_flowkit.flowkit.command_utils - DEBUG - 创建目录: C:\Users\anping.chen\Desktop\EDP_AI\Example\WORK_PATH\dongting\P85\block1\user1\test1\data\pnr_innovus.place
+2025-12-01 14:18:12 - edp_center.packages.edp_flowkit.flowkit.ICCommandExecutor - DEBUG - 执行步骤: pnr_innovus.place
+2025-12-01 14:18:12 - edp_center.packages.edp_flowkit.flowkit.ICCommandExecutor - DEBUG - 命令文件: place.tcl
+2025-12-01 14:18:12 - edp_center.packages.edp_flowkit.flowkit.ICCommandExecutor - INFO - 执行命令: bsub -Ip -q normal -cwd C:\Users\anping.chen\Desktop\EDP_AI\Example\WORK_PATH\dongting\P85\block1\user1\test1\runs\pnr_innovus.place -J pnr_innovus.place_test1_user1 -n 32 -R "rusage[mem=12000] span[hosts=1]" 'innovus -file C:\Users\anping.chen\Desktop\EDP_AI\Example\WORK_PATH\dongting\P85\block1\user1\test1\cmds\pnr_innovus\place.tcl 2>&1 | tee C:\Users\anping.chen\Desktop\EDP_AI\Example\WORK_PATH\dongting\P85\block1\user1\test1\logs\pnr_innovus.place\pnr_innovus.place_20251201_141812.log'
+2025-12-01 14:18:12 - edp_center.packages.edp_flowkit.flowkit.ICCommandExecutor - DEBUG - 工作目录: C:\Users\anping.chen\Desktop\EDP_AI\Example\WORK_PATH\dongting\P85\block1\user1\test1\runs\pnr_innovus.place
+2025-12-01 14:18:12 - edp_center.packages.edp_flowkit.flowkit.ICCommandExecutor - DEBUG - 日志文件: C:\Users\anping.chen\Desktop\EDP_AI\Example\WORK_PATH\dongting\P85\block1\user1\test1\logs\pnr_innovus.place\pnr_innovus.place_20251201_141812.log
+2025-12-01 14:18:12 - edp_center.packages.edp_flowkit.flowkit.command_runner - INFO - LSF提交步骤 pnr_innovus.place, 工作目录: C:\Users\anping.chen\Desktop\EDP_AI\Example\WORK_PATH\dongting\P85\block1\user1\test1\runs\pnr_innovus.place
+2025-12-01 14:18:12 - edp_center.packages.edp_flowkit.flowkit.command_runner - INFO - LSF命令: bsub -Ip -q normal -cwd C:\Users\anping.chen\Desktop\EDP_AI\Example\WORK_PATH\dongting\P85\block1\user1\test1\runs\pnr_innovus.place -J pnr_innovus.place_test1_user1 -n 32 -R "rusage[mem=12000] span[hosts=1]" 'innovus -file C:\Users\anping.chen\Desktop\EDP_AI\Example\WORK_PATH\dongting\P85\block1\user1\test1\cmds\pnr_innovus\place.tcl 2>&1 | tee C:\Users\anping.chen\Desktop\EDP_AI\Example\WORK_PATH\dongting\P85\block1\user1\test1\logs\pnr_innovus.place\pnr_innovus.place_20251201_141812.log'
+2025-12-01 14:18:12 - edp_center.packages.edp_flowkit.flowkit.command_runner - INFO - 交互模式（单个作业）：直接执行命令，输出将显示在终端，X11 窗口应该会弹出
+2025-12-01 14:18:12 - edp_center.packages.edp_flowkit.flowkit.command_runner - INFO - 交互模式：程序将等待 innovus 关闭后才会继续
+2025-12-01 14:18:12 - edp_center.packages.edp_flowkit.flowkit.command_runner - ERROR - 交互模式作业执行失败，返回码: 255
+[2025-12-01 14:18:12] [ERROR] 执行失败: pnr_innovus.place

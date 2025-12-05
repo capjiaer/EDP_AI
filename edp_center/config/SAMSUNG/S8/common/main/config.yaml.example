@@ -1,0 +1,93 @@
+# config.yaml - 流程配置文件模板
+# 
+# 此文件定义了各个流程（flow）的配置参数
+# 包括工具选项、LSF 设置、资源分配等
+#
+# 配置加载优先级（从低到高）：
+# 1. common/main/config.yaml (此文件)
+# 2. {project}/main/config.yaml (项目特定配置，会覆盖此文件)
+# 3. user_config.yaml 或 user_config.tcl (用户配置，最高优先级)
+#
+# 注意：所有变量必须使用数组格式（带命名空间），例如：
+#   pv_calibre: {ipmerge: {cpu_num: 16}}  -> set pv_calibre(ipmerge,cpu_num) 16
+#   不允许简单变量：cpu_num: 16  (错误！)
+
+# ============================================================================
+# pv_calibre 流程配置示例
+# ============================================================================
+pv_calibre:
+  # default 部分：所有步骤的默认配置
+  default:
+    # LSF 设置
+    lsf: 1                    # 是否使用 LSF (1=是, 0=否，使用本地执行)
+    queue: "default"           # LSF 队列名称
+    lsf_opt: "-Ip"            # LSF 选项（-Ip 表示交互式，"" 表示非交互式）
+    pre_lsf: ""               # LSF 命令前的预处理命令（可选）
+    
+    # 工具选项
+    tool_opt: "calibre -64 -batch"  # 工具命令（如 calibre, innovus 等）
+    
+    # 资源分配
+    cpu_num: 16               # CPU 核心数
+    memory: 10000             # 内存（MB）
+    span: 1                   # 跨节点数（LSF 资源需求）
+  
+  # 特定步骤的配置（会覆盖 default 中的配置）
+  ipmerge:
+    cpu_num: 16               # 覆盖 default 中的 cpu_num
+    queue: "default"          # 覆盖 default 中的 queue
+    lsf: 1                    # 覆盖 default 中的 lsf
+  
+  # Python 脚本示例（本地执行）
+  test_py:
+    tool_opt: "python"        # 使用 Python 执行
+    lsf: 0                    # 本地执行，不使用 LSF
+
+# ============================================================================
+# pnr_innovus 流程配置示例
+# ============================================================================
+# pnr_innovus:
+#   default:
+#     lsf: 1
+#     tool_opt: "innovus -64"
+#     cpu_num: 32
+#     memory: 20000
+#     queue: "high_mem"
+#     lsf_opt: "-Ip"
+#   init:
+#     cpu_num: 16
+#   floorplan:
+#     cpu_num: 24
+#   place:
+#     cpu_num: 32
+#   route:
+#     cpu_num: 32
+
+# ============================================================================
+# 变量保护示例（高级功能）
+# ============================================================================
+# 使用 value/protect/constraint/description 结构可以保护变量：
+#
+# pv_calibre:
+#   ipmerge:
+#     cpu_num:
+#       value: 16              # 变量值
+#       protect: 16            # 保护值（运行时无法修改）
+#       constraint: "8 16 32"  # 允许的值列表（只允许这三个值）
+#       description: "CPU number for ipmerge step"  # 变量描述
+#
+# 在 Tcl 中会生成：
+#   set pv_calibre(ipmerge,cpu_num) 16
+#   set pv_calibre(ipmerge,cpu_num,protect) 16
+#   set pv_calibre(ipmerge,cpu_num,constraint) "8 16 32"
+#   set pv_calibre(ipmerge,cpu_num,description) "CPU number for ipmerge step"
+
+# ============================================================================
+# 注意事项
+# ============================================================================
+# 1. 所有变量必须使用数组格式（带命名空间）
+# 2. 配置按优先级从低到高加载，后加载的会覆盖先加载的
+# 3. 如果某个步骤没有配置，会使用 default 中的配置
+# 4. 如果 default 中也没有配置，会使用系统默认值
+# 5. 变量保护功能是可选的，普通变量可以直接使用 value: 16 的格式
+

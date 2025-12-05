@@ -1,0 +1,4 @@
+# All variables must be arrays (with namespace)
+# Example: project: {a: 1} generates set project(a) 1
+project:
+  test_var: 1

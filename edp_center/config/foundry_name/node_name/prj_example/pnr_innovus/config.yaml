@@ -1,0 +1,208 @@
+# ============================================================================
+# pnr_innovus Flow 配置文件
+# ============================================================================
+# 此文件包含 pnr_innovus flow 的所有配置项，包括：
+# 1. LSF 执行配置（default 和 step 特定配置）
+# 2. RELEASE 配置（文件映射和发布规则）
+# 3. 其他可选配置
+# ============================================================================
+
+# ----------------------------------------------------------------------------
+# 1. Flow 名称（必须与目录名一致）
+# ----------------------------------------------------------------------------
+pnr_innovus:
+  
+  # ----------------------------------------------------------------------------
+  # 2. LSF 执行配置
+  # ----------------------------------------------------------------------------
+  # default: 所有 step 的默认配置（会被 step 特定配置覆盖）
+  default:
+    # LSF 相关配置
+    lsf: 1                          # 是否使用 LSF（1=是，0=否，本地执行）
+    queue: "normal"                  # LSF 队列名称
+    lsf_opt: ""                      # LSF 额外选项（如 "-Ip" 表示交互式）
+    wait_lsf: true                   # 是否等待 LSF 作业完成（true=等待，false=不等待，xterm 模式）
+    lsf_poll_interval: 30           # LSF 状态轮询间隔（秒）
+    lsf_max_wait_time: 86400        # LSF 最大等待时间（秒，86400=24小时）
+    
+    # 工具执行配置
+    tool_opt: "innovus -file"       # 工具命令（如 "innovus -file", "calibre -64 -batch"）
+    pre_lsf: ""                      # LSF 提交前的预处理命令（可选）
+    
+    # 资源需求
+    cpu_num: 16                      # CPU 核心数
+    memory: 8000                     # 内存需求（MB）
+    span: 1                          # 跨节点数（通常为 1）
+  
+  # ----------------------------------------------------------------------------
+  # 3. Step 特定配置（覆盖 default 配置）
+  # ----------------------------------------------------------------------------
+  # 每个 step 可以覆盖 default 中的任何配置项
+  floorplan:
+    queue: "high_mem"                # 使用高内存队列
+    memory: 16000                     # floorplan 需要更多内存
+  
+  place:
+    cpu_num: 32                      # place 需要更多 CPU
+    memory: 12000                     # place 需要更多内存
+  
+  postroute:
+    cpu_num: 32                      # postroute 需要更多 CPU
+    memory: 16000                     # postroute 需要更多内存
+    queue: "high_mem"                 # 使用高内存队列
+  
+  route:
+    lsf_opt: "-Ip"                   # 交互式模式（xterm）
+    wait_lsf: false                   # 不等待（xterm 模式，支持并行）
+    cpu_num: 64                       # route 需要大量 CPU
+    memory: 24000                     # route 需要大量内存
+  
+  # 示例：本地执行（不使用 LSF）
+  # test_step:
+  #   lsf: 0                          # 本地执行
+  #   tool_opt: "python"              # 使用 Python 执行
+  
+  # 示例：Python 脚本
+  # python_step:
+  #   tool_opt: "python3"
+  #   lsf: 1
+  #   queue: "python_queue"
+
+# ----------------------------------------------------------------------------
+# 4. RELEASE 配置
+# ----------------------------------------------------------------------------
+release:
+  # 文件到目录的映射规则（通用规则，适用于所有 step）
+  file_mappings:
+    # DEF 文件：Design Exchange Format
+    def: "**/*.def"
+    
+    # DB 文件：数据库文件（Innovus 设计数据库）
+    db: "**/*.db"
+    
+    # SDF 文件：Standard Delay Format（时序信息）
+    sdf: "**/*.sdf"
+    
+    # SPEF 文件：Standard Parasitic Exchange Format（寄生参数）
+    spef: "**/*.spef"
+    
+    # Verilog 网表文件
+    verilog: "**/*.v **/*.vg"
+    
+    # 配置文件：Tcl 和 SDC 约束文件
+    config: "**/*.mmc.tcl **/*.sdc config/**/*.tcl"
+    
+    # Timing 报告：CSV 格式的时序数据
+    timing: "timing/**/*.csv"
+    
+    # LEF 文件：Library Exchange Format
+    lef: "**/*.lef"
+    
+    # OAS 文件：Open Artwork System
+    oas: "**/*.oas"
+    
+    # UPF 文件：Unified Power Format
+    upf: "**/*.upf"
+    
+    # ILM 文件：Interface Logic Model
+    ilm: "**/*.ilm"
+    
+    # HCEL 文件：Hard Cell
+    hcell: "**/*.hcell"
+  
+  # 保持目录结构的目录（这些目录会保留源目录结构）
+  keep_structure:
+    - "timing"      # timing 目录保持结构
+    - "config"      # config 目录保持结构
+    - "lib"         # lib 目录保持结构（如果使用 @libs）
+  
+  # 按 step 的特定规则（可选，增量覆盖通用规则）
+  # 注意：step_rules 只会覆盖指定的映射，未指定的映射会保留通用规则
+  # 如果要排除某些文件类型，可以：
+  #   1. 在 file_mappings 中设置为 null 或空字符串
+  #   2. 使用 exclude 列表
+  step_rules:
+    # postroute step 的特定规则
+    postroute:
+      file_mappings:
+        def: "*.def output/*.def"                    # 覆盖通用规则中的 def 映射
+        db: "output/*.db"                            # 覆盖通用规则中的 db 映射
+        sdf: "results/*.sdf"                         # 覆盖通用规则中的 sdf 映射
+        spef: "results/*.spef"                       # 覆盖通用规则中的 spef 映射
+        verilog: "netlist/*.v netlist/*.vg"          # 覆盖通用规则中的 verilog 映射
+        timing: "timing/postroute.csv timing/**/*.csv"  # 覆盖通用规则中的 timing 映射
+        config: "**/*.mmc.tcl config/*.sdc"         # 覆盖通用规则中的 config 映射
+        # 其他未指定的映射（如 lef, oas, upf, ilm, hcell）会保留通用规则
+    
+    # place step 的特定规则
+    place:
+      file_mappings:
+        def: "*.def output/*.def"                    # 覆盖通用规则中的 def 映射
+        db: "output/*.db"                            # 覆盖通用规则中的 db 映射
+        timing: "timing/place.csv timing/**/*.csv"  # 覆盖通用规则中的 timing 映射
+        config: "**/*.mmc.tcl config/*.sdc"         # 覆盖通用规则中的 config 映射
+        # 其他未指定的映射（如 sdf, spef, verilog, lef, oas, upf）会保留通用规则
+    
+    # floorplan step 的特定规则
+    floorplan:
+      file_mappings:
+        def: "*.def"                                 # 覆盖通用规则中的 def 映射（只匹配根目录的 .def）
+        db: "output/*.db"                            # 覆盖通用规则中的 db 映射
+        config: "config/*.tcl config/*.sdc"          # 覆盖通用规则中的 config 映射
+        # 排除某些文件类型（设置为 null 或空字符串）
+        sdf: null                                    # 排除 sdf 文件（floorplan 阶段通常没有 sdf）
+        spef: null                                   # 排除 spef 文件
+        verilog: null                                # 排除 verilog 文件
+        # 或者使用 exclude 列表（两种方式选一种）
+      # exclude:
+      #   - "sdf"
+      #   - "spef"
+      #   - "verilog"
+      # 其他未指定的映射（如 timing, lef, oas, upf, ilm, hcell）会保留通用规则
+
+# ----------------------------------------------------------------------------
+# 5. 其他可选配置（根据实际需求添加）
+# ----------------------------------------------------------------------------
+
+# 示例：环境变量配置
+# environment:
+#   INNOVUS_HOME: "/path/to/innovus"
+#   LD_LIBRARY_PATH: "/path/to/libs"
+
+# 示例：工具版本配置
+# tool_version:
+#   innovus: "21.1"
+
+# 示例：路径别名配置
+# path_aliases:
+#   design_lib: "/path/to/design/lib"
+#   tech_lib: "/path/to/tech/lib"
+
+# 示例：日志配置
+# logging:
+#   level: "INFO"
+#   format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+
+# ============================================================================
+# 配置说明：
+# ============================================================================
+# 1. LSF 配置优先级：
+#    - step 特定配置 > default 配置
+#    - 项目特定配置 > common 配置
+#
+# 2. RELEASE 配置：
+#    - file_mappings: 定义文件到目录的映射规则
+#    - keep_structure: 指定哪些目录保持源目录结构
+#    - step_rules: step 特定规则（增量覆盖）
+#
+# 3. 文件路径模式：
+#    - "*.def": 匹配根目录下的所有 .def 文件
+#    - "output/*.def": 匹配 output/ 目录下的所有 .def 文件
+#    - "**/*.def": 递归匹配所有目录下的 .def 文件
+#    - "a_dir/**/*.def": 递归匹配 a_dir/ 及其子目录下的所有 .def 文件
+#    - "@libs": 复制整个 libs/ 目录
+#
+# 4. 排除文件：
+#    - 在 file_mappings 中设置为 null 或空字符串
+#    - 或使用 exclude 列表
+# ============================================================================

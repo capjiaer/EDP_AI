@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EDP Metrics Dashboard</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            padding-top: 20px;
+            background-color: #f8f9fa;
+        }
+        .metric-card {
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+        .metric-card:hover {
+            transform: translateY(-5px);
+        }
+        .sidebar {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 100;
+            padding: 48px 0 0;
+            box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
+        }
+        .card-header {
+            font-weight: bold;
+            background-color: #fff;
+            border-bottom: 2px solid #e9ecef;
+        }
+        .value-text {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #0d6efd;
+        }
+        .unit-text {
+            font-size: 1rem;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <main class="col-md-12 ms-sm-auto col-lg-12 px-md-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">Metrics Dashboard</h1>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        <div class="input-group">
+                            <input type="text" id="runPathInput" class="form-control" placeholder="Enter Run Path..." size="50">
+                            <button class="btn btn-primary" type="button" onclick="loadMetrics()">Load</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Alert Area -->
+                <div id="alertArea"></div>
+
+                <!-- Summary Cards -->
+                <div class="row mb-4" id="summaryArea">
+                    <!-- Summary cards will be injected here -->
+                </div>
+
+                <!-- Charts Area -->
+                <div class="row" id="chartsArea">
+                    <!-- Charts will be injected here -->
+                </div>
+                
+                <!-- Raw Data Table -->
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                Raw Data View
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-striped table-sm" id="dataTable">
+                                        <thead>
+                                            <tr>
+                                                <th>Category</th>
+                                                <th>Path</th>
+                                                <th>Value</th>
+                                                <th>Raw</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        async function loadMetrics() {
+            const runPath = document.getElementById('runPathInput').value;
+            if (!runPath) return;
+
+            try {
+                const response = await fetch(`/metrics/scan?run_path=${encodeURIComponent(runPath)}`);
+                const result = await response.json();
+
+                if (result.success) {
+                    renderDashboard(result.data);
+                    showAlert('Metrics loaded successfully', 'success');
+                } else {
+                    showAlert(result.error || 'Failed to load metrics', 'danger');
+                }
+            } catch (error) {
+                showAlert('Network error: ' + error.message, 'danger');
+            }
+        }
+
+        function showAlert(message, type) {
+            const alertArea = document.getElementById('alertArea');
+            alertArea.innerHTML = `
+                <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            `;
+        }
+
+        function renderDashboard(data) {
+            const summaryArea = document.getElementById('summaryArea');
+            const dataTableBody = document.querySelector('#dataTable tbody');
+            summaryArea.innerHTML = '';
+            dataTableBody.innerHTML = '';
+
+            // 1. Render Summary
+            // Assuming data.summary is structured as { stage: { metric: value } }
+            // Flatten it for display if needed
+            if (data.summary) {
+                for (const stage in data.summary) {
+                    for (const metric in data.summary[stage]) {
+                        const value = data.summary[stage][metric];
+                        const card = `
+                            <div class="col-md-3 col-sm-6">
+                                <div class="card metric-card text-center">
+                                    <div class="card-header">${metric}</div>
+                                    <div class="card-body">
+                                        <div class="value-text">${value}</div>
+                                        <div class="unit-text">${stage}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        summaryArea.innerHTML += card;
+                    }
+                }
+            }
+
+            // 2. Render Table
+            if (data.categories) {
+                for (const category in data.categories) {
+                    const items = data.categories[category];
+                    items.forEach(item => {
+                        const row = `
+                            <tr>
+                                <td>${category}</td>
+                                <td>${item.path.join(' > ')}</td>
+                                <td>${item.value}</td>
+                                <td>${item.raw_value}</td>
+                            </tr>
+                        `;
+                        dataTableBody.innerHTML += row;
+                    });
+                }
+                
+                // 3. Render Charts (Simple Example: Utilization & Density)
+                renderCharts(data.categories);
+            }
+        }
+        
+        function renderCharts(categories) {
+             const chartsArea = document.getElementById('chartsArea');
+             chartsArea.innerHTML = ''; // Clear previous charts
+             
+             // Example: Render specific charts if data exists
+             // This is where we can add more sophisticated visualization logic
+             // For now, let's create a chart for Timing (WNS)
+             
+             if (categories.timing) {
+                 const timingItems = categories.timing.filter(i => i.path.includes('wns'));
+                 if (timingItems.length > 0) {
+                     const labels = timingItems.map(i => i.path.join(' '));
+                     const values = timingItems.map(i => i.value);
+                     
+                     const chartId = 'timingChart';
+                     chartsArea.innerHTML += `
+                        <div class="col-md-6 mb-4">
+                            <div class="card">
+                                <div class="card-header">Timing WNS Overview</div>
+                                <div class="card-body">
+                                    <canvas id="${chartId}"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                     `;
+                     
+                     // Need to wait for DOM update
+                     requestAnimationFrame(() => {
+                        new Chart(document.getElementById(chartId), {
+                            type: 'bar',
+                            data: {
+                                labels: labels,
+                                datasets: [{
+                                    label: 'WNS (ns)',
+                                    data: values,
+                                    backgroundColor: values.map(v => v < 0 ? 'rgba(255, 99, 132, 0.6)' : 'rgba(75, 192, 192, 0.6)'),
+                                    borderColor: values.map(v => v < 0 ? 'rgba(255, 99, 132, 1)' : 'rgba(75, 192, 192, 1)'),
+                                    borderWidth: 1
+                                }]
+                            },
+                            options: {
+                                scales: {
+                                    y: { beginAtZero: true }
+                                }
+                            }
+                        });
+                     });
+                 }
+             }
+        }
+        
+        // Auto-fill path if provided in URL params (for integration)
+        window.onload = function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const path = urlParams.get('path');
+            if (path) {
+                document.getElementById('runPathInput').value = path;
+                loadMetrics();
+            }
+        }
+    </script>
+    
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+

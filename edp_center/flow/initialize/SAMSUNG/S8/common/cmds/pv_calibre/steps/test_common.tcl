@@ -1,0 +1,1 @@
+puts "test_common"

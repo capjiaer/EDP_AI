@@ -1,0 +1,18 @@
+pv_calibre:
+  dependency:
+    FP_MODE:
+      - ipmerge:
+          in: postroute.pass
+          out: ipmerge.pass
+          cmd: calibre_ipmerge.tcl
+      - dummy:
+          in: ipmerge.pass
+          out: dummy.pass
+          cmd: calibre_dummy.tcl
+      - colorrtg:
+          in: dummy.pass
+          out: colorrtg.pass
+          cmd: calibre_drc.tcl
+      - test_py:
+          cmd: test_py.py
+

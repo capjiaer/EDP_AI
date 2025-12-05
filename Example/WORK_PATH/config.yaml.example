@@ -1,0 +1,71 @@
+# config.yaml - 工作路径配置文件模板
+# 
+# 此文件用于在 WORK_PATH 目录下配置项目初始化参数
+# 当执行 edp -init 时，会读取此文件来自动初始化项目结构
+#
+# 文件位置：WORK_PATH/config.yaml
+# 使用方法：复制此文件为 config.yaml，然后修改相应的配置
+
+# 项目配置
+# 所有配置都在 project 下，这样转成 Tcl 时可以通过 project(var_name) 访问
+project:
+  # 项目名称（必填）
+  name: dongting
+  
+  # 项目版本（必填，如 P85, P90 等）
+  version: P85
+  
+  # 允许 init 的工作路径列表（安全控制）
+  # 只有在此列表中的路径才允许执行 init 操作
+  # 支持绝对路径和相对路径（相对于 edp_center 的父目录）
+  # 如果为空列表或未设置，则使用 init_project.yaml 的配置
+  # 
+  # 示例配置：
+  allowed_work_paths:
+    - "Example/WORK_PATH"                    # 相对路径（推荐）
+    # - "/absolute/path/to/WORK_PATH"        # 绝对路径示例
+    # - "C:/Users/username/WORK_PATH"        # Windows 绝对路径
+    # - "/c/Users/username/WORK_PATH"        # Unix 风格路径（会自动转换）
+  
+  # 块（blocks）配置
+  # 定义要初始化的块和用户
+  # 格式：块名: 用户列表（空格分隔）
+  blocks:
+    block1: user1 user2
+    block2: user3 user4
+    # block3: user5 user6 user7              # 可以添加更多块
+
+# ============================================================================
+# 配置说明
+# ============================================================================
+# 1. name: 项目名称，必须与 edp_center/config/{foundry}/{node}/{project} 中的项目名一致
+# 2. version: 项目版本，用于创建版本目录（如 P85, P90）
+# 3. allowed_work_paths: 安全控制，限制只能在指定路径下执行 init
+# 4. blocks: 定义要初始化的块和用户列表
+#
+# 执行 edp -init 时会：
+# - 创建目录结构：WORK_PATH/{name}/{version}/{block}/{user}/main/
+# - 创建 .edp_version 文件记录项目信息
+# - 初始化默认的 main 分支
+
+# ============================================================================
+# 使用示例
+# ============================================================================
+# 1. 复制模板文件：
+#    cp config.yaml.example config.yaml
+#
+# 2. 修改配置：
+#    - 修改 name 为你的项目名称
+#    - 修改 version 为你的项目版本
+#    - 修改 blocks 为你要初始化的块和用户
+#
+# 3. 执行初始化：
+#    cd WORK_PATH
+#    edp -init
+#
+# 4. 或者只初始化特定块：
+#    edp -init --block block1
+#
+# 5. 或者只初始化特定块和用户：
+#    edp -init --block block1 --user user1
+

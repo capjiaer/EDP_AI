@@ -1,0 +1,26 @@
+pnr_innovus:
+  default:
+    lsf: 1
+    tool_opt: "innovus -file"
+    queue: "normal"
+    lsf_opt: ""
+    cpu_num: 16
+    memory: 8000
+    span: 1
+    wait_lsf: true
+    lsf_poll_interval: 30
+    lsf_max_wait_time: 86400
+  
+  floorplan:
+    queue: "high_mem"
+    memory: 16000
+  
+  place:
+    cpu_num: 32
+    memory: 12000
+  
+  route:
+    lsf_opt: "-Ip"
+    wait_lsf: false  # xterm 模式，支持并行
+    cpu_num: 64
+    memory: 24000

@@ -1,0 +1,29 @@
+=== EDP Run Log ===
+开始时间: 2025-11-24 17:51:24
+步骤: pnr_innovus.place
+工作目录: C:\Users\anping.chen\Desktop\EDP_AI\Example\WORK_PATH\dongting\P85\block1\user1\main
+==================================================
+
+[2025-11-24 17:51:24] [INFO] 开始执行: pnr_innovus.place
+2025-11-24 17:51:24 - edp_center.packages.edp_flowkit.flowkit.command_utils - DEBUG - 创建目录: C:\Users\anping.chen\Desktop\EDP_AI\Example\WORK_PATH\dongting\P85\block1\user1\main\rpts\pnr_innovus.place
+2025-11-24 17:51:24 - edp_center.packages.edp_flowkit.flowkit.command_utils - DEBUG - 创建目录: C:\Users\anping.chen\Desktop\EDP_AI\Example\WORK_PATH\dongting\P85\block1\user1\main\data\pnr_innovus.place
+2025-11-24 17:51:24 - edp_center.packages.edp_flowkit.flowkit.ICCommandExecutor - DEBUG - 执行步骤: pnr_innovus.place
+2025-11-24 17:51:24 - edp_center.packages.edp_flowkit.flowkit.ICCommandExecutor - DEBUG - 命令文件: place.tcl
+2025-11-24 17:51:24 - edp_center.packages.edp_flowkit.flowkit.ICCommandExecutor - INFO - 执行命令: bsub -q normal -cwd C:\Users\anping.chen\Desktop\EDP_AI\Example\WORK_PATH\dongting\P85\block1\user1\main\runs\pnr_innovus.place -J pnr_innovus.place_main_user1 -n 32 -R "rusage[mem=12000] span[hosts=1]" -o C:\Users\anping.chen\Desktop\EDP_AI\Example\WORK_PATH\dongting\P85\block1\user1\main\logs\pnr_innovus.place\pnr_innovus.place_20251124_175124.log 'innovus -file C:\Users\anping.chen\Desktop\EDP_AI\Example\WORK_PATH\dongting\P85\block1\user1\main\cmds\pnr_innovus\place.tcl 2>&1 | tee C:\Users\anping.chen\Desktop\EDP_AI\Example\WORK_PATH\dongting\P85\block1\user1\main\logs\pnr_innovus.place\pnr_innovus.place_20251124_175124.log'
+2025-11-24 17:51:24 - edp_center.packages.edp_flowkit.flowkit.ICCommandExecutor - DEBUG - 工作目录: C:\Users\anping.chen\Desktop\EDP_AI\Example\WORK_PATH\dongting\P85\block1\user1\main\runs\pnr_innovus.place
+2025-11-24 17:51:24 - edp_center.packages.edp_flowkit.flowkit.ICCommandExecutor - DEBUG - 日志文件: C:\Users\anping.chen\Desktop\EDP_AI\Example\WORK_PATH\dongting\P85\block1\user1\main\logs\pnr_innovus.place\pnr_innovus.place_20251124_175124.log
+2025-11-24 17:51:24 - edp_center.packages.edp_flowkit.flowkit.command_runner - INFO - LSF提交步骤 pnr_innovus.place, 工作目录: C:\Users\anping.chen\Desktop\EDP_AI\Example\WORK_PATH\dongting\P85\block1\user1\main\runs\pnr_innovus.place
+2025-11-24 17:51:24 - edp_center.packages.edp_flowkit.flowkit.command_runner - INFO - LSF命令: bsub -q normal -cwd C:\Users\anping.chen\Desktop\EDP_AI\Example\WORK_PATH\dongting\P85\block1\user1\main\runs\pnr_innovus.place -J pnr_innovus.place_main_user1 -n 32 -R "rusage[mem=12000] span[hosts=1]" -o C:\Users\anping.chen\Desktop\EDP_AI\Example\WORK_PATH\dongting\P85\block1\user1\main\logs\pnr_innovus.place\pnr_innovus.place_20251124_175124.log 'innovus -file C:\Users\anping.chen\Desktop\EDP_AI\Example\WORK_PATH\dongting\P85\block1\user1\main\cmds\pnr_innovus\place.tcl 2>&1 | tee C:\Users\anping.chen\Desktop\EDP_AI\Example\WORK_PATH\dongting\P85\block1\user1\main\logs\pnr_innovus.place\pnr_innovus.place_20251124_175124.log'
+2025-11-24 17:51:25 - edp_center.packages.edp_flowkit.flowkit.lsf_error_handler - ERROR - 步骤 pnr_innovus.place 提交到LSF失败
+2025-11-24 17:51:25 - edp_center.packages.edp_flowkit.flowkit.lsf_error_handler - ERROR - 返回码: 255
+2025-11-24 17:51:25 - edp_center.packages.edp_flowkit.flowkit.lsf_error_handler - ERROR - 标准输出: (空)
+2025-11-24 17:51:25 - edp_center.packages.edp_flowkit.flowkit.lsf_error_handler - ERROR - 标准错误: (空)
+2025-11-24 17:51:25 - edp_center.packages.edp_flowkit.flowkit.lsf_error_handler - ERROR - 返回码 255 通常表示命令未找到（在 Git Bash 中）
+2025-11-24 17:51:25 - edp_center.packages.edp_flowkit.flowkit.lsf_error_handler - ERROR - 步骤 pnr_innovus.place 提交到LSF失败
+2025-11-24 17:51:25 - edp_center.packages.edp_flowkit.flowkit.lsf_error_handler - ERROR - 检测到 LSF 环境问题：找不到 bsub 命令
+2025-11-24 17:51:25 - edp_center.packages.edp_flowkit.flowkit.lsf_error_handler - ERROR - 请确保：
+2025-11-24 17:51:25 - edp_center.packages.edp_flowkit.flowkit.lsf_error_handler - ERROR -   1. LSF 已正确安装和配置
+2025-11-24 17:51:25 - edp_center.packages.edp_flowkit.flowkit.lsf_error_handler - ERROR -   2. LSF 环境变量已设置（如 LSF_SERVERDIR, LSF_ENVDIR 等）
+2025-11-24 17:51:25 - edp_center.packages.edp_flowkit.flowkit.lsf_error_handler - ERROR -   3. PATH 中包含 LSF 的 bin 目录
+2025-11-24 17:51:25 - edp_center.packages.edp_flowkit.flowkit.lsf_error_handler - ERROR -   4. 或者使用 --dry-run 模式查看构建的命令（不实际执行）
+[2025-11-24 17:51:25] [ERROR] 执行失败: pnr_innovus.place

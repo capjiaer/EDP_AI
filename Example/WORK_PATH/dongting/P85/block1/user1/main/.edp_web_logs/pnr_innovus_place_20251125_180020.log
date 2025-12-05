@@ -1,0 +1,18 @@
+[EDP_WEB] 开始执行步骤: pnr_innovus.place
+[EDP_WEB] 时间: 2025-11-25 18:00:20
+[EDP_WEB] Debug 模式: 0
+================================================================================
+[OK] 从 .edp_version 文件推断：
+  work_path: C:\Users\anping.chen\Desktop\EDP_AI\Example\WORK_PATH\dongting\P85\block1\user1\main
+  project: dongting
+  version: P85
+  block: block1
+  user: user1
+[INFO] 已生成 full.tcl: C:\Users\anping.chen\Desktop\EDP_AI\Example\WORK_PATH\dongting\P85\block1\user1\main\runs\pnr_innovus.place\full.tcl
+[OK] 脚本已生成: C:\Users\anping.chen\Desktop\EDP_AI\Example\WORK_PATH\dongting\P85\block1\user1\main\dongting\P85\block1\user1\main\cmds\pnr_innovus\place.tcl
+[INFO] 开始执行: pnr_innovus.place
+[INFO] 执行命令: bsub -Ip -q normal -cwd C:\Users\anping.chen\Desktop\EDP_AI\Example\WORK_PATH\dongting\P85\block1\user1\main\dongting\P85\block1\user1\main\runs\pnr_innovus.place -J pnr_innovus.place_main_user1 -n 32 -R "rusage[mem=12000] span[hosts=1]" 'innovus -file C:\Users\anping.chen\Desktop\EDP_AI\Example\WORK_PATH\dongting\P85\block1\user1\main\dongting\P85\block1\user1\main\cmds\pnr_innovus\place.tcl 2>&1 | tee C:\Users\anping.chen\Desktop\EDP_AI\Example\WORK_PATH\dongting\P85\block1\user1\main\dongting\P85\block1\user1\main\logs\pnr_innovus.place\pnr_innovus.place_20251125_180020.log'
+[INFO] 已更新运行记录: C:\Users\anping.chen\Desktop\EDP_AI\Example\WORK_PATH\dongting\P85\block1\user1\main\dongting\P85\block1\user1\main\.run_info
+[ERROR] 执行失败: pnr_innovus.place
+================================================================================
+[EDP_WEB] 执行失败: pnr_innovus.place (退出码: 1)

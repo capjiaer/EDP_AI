@@ -1,0 +1,58 @@
+# init_project.yaml - 项目初始化配置文件示例
+# 
+# 此文件定义了项目初始化时的默认配置
+# 包括块（blocks）列表和分支模板（branch_template）
+#
+# 配置加载优先级：
+# 1. common/main/init_project.yaml (此文件)
+# 2. {project}/main/init_project.yaml (项目特定配置，会覆盖此文件)
+
+# 项目相关信息
+project:
+  # 工作路径名称（默认使用 WORK_PATH）
+  work_path_name: "WORK_PATH"
+  
+  # 项目节点（project_node）的默认命名规则
+  # 例如：P85, P90 等表示项目阶段
+  node_naming_pattern: "P{number}"  # 可选，用于验证项目节点名称格式
+  
+  # 允许 init 的工作路径列表（安全控制）
+  # 只有在此列表中的路径才允许执行 init 操作
+  # 支持绝对路径和相对路径（相对于 edp_center 的父目录）
+  # 如果为空列表或未设置，则不限制（向后兼容）
+  # 
+  # 示例配置（实际使用示例）：
+  allowed_work_paths:
+    - "Example/WORK_PATH"            # 相对路径（相对于 edp_center 的父目录）
+    # - "/absolute/path/to/WORK_PATH"  # 绝对路径示例
+    # - "/another/allowed/WORK_PATH"    # 多个允许的路径示例
+
+# 默认的块（blocks）列表
+# 如果命令行指定了 blocks，则使用命令行参数
+# 如果未指定，则使用此列表
+blocks:
+  - name: block1
+    description: "块1"
+  - name: block2
+    description: "块2"
+  
+# 分支模板（branch_template）
+# 定义创建分支时的目录结构和文件
+branch_template:
+  # 分支目录列表
+  # 这些目录会在创建分支时自动创建
+  directories:
+    - cmds      # 命令脚本目录
+    - dbs       # 数据库目录
+    - flow      # 流程目录
+    - hooks     # 钩子目录
+    - logs      # 日志目录
+    - rpts      # 报告目录
+    - runs      # 运行目录
+  
+  # 分支文件列表
+  # 这些文件会在创建分支时自动创建（空文件）
+  files:
+    - user_config.tcl   # 用户配置（TCL格式）
+    - user_config.yaml  # 用户配置（YAML格式）
+

@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{TITLE}}</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            margin-top: 0;
+            color: #333;
+        }
+        .controls {
+            margin-bottom: 20px;
+            padding: 10px;
+            background: #f9f9f9;
+            border-radius: 4px;
+        }
+        .controls button {
+            margin-right: 10px;
+            padding: 5px 15px;
+            cursor: pointer;
+        }
+        #graph-container {
+            width: 100%;
+            height: 800px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            overflow: auto;
+        }
+        .node {
+            cursor: default;
+        }
+        .node rect {
+            fill: #fff;
+            stroke: #333;
+        }
+        .node text {
+            font-size: 11px;
+            pointer-events: none;
+        }
+        .link {
+            fill: none;
+            stroke: #333;
+            stroke-width: 2px;
+        }
+        .tooltip {
+            position: absolute;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            border-radius: 4px;
+            pointer-events: none;
+            font-size: 12px;
+            max-width: 300px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>{{TITLE}}</h1>
+        <div class="controls">
+            <button onclick="resetZoom()">重置缩放</button>
+            <button onclick="centerGraph()">居中显示</button>
+            <span id="info"></span>
+        </div>
+        <div id="graph-container"></div>
+    </div>
+
+    <script>
+        (function() {
+        const graphData = {{GRAPH_DATA}};
+        
+        const width = document.getElementById('graph-container').clientWidth;
+        const height = 800;
+        
+        // 检查数据
+        if (!graphData.nodes || graphData.nodes.length === 0) {
+            document.getElementById('info').textContent = '没有找到步骤数据';
+            const errorMsg = document.createElement('div');
+            errorMsg.style.padding = '20px';
+            errorMsg.style.color = 'red';
+            errorMsg.textContent = '错误：没有找到步骤数据。请检查项目配置和 dependency.yaml 文件。';
+            document.getElementById('graph-container').appendChild(errorMsg);
+            return;
+        }
+        
+        const svg = d3.select('#graph-container')
+            .append('svg')
+            .attr('width', width)
+            .attr('height', height);
+        
+        const g = svg.append('g');
+        
+        // 缩放行为
+        const zoom = d3.zoom()
+            .scaleExtent([0.1, 4])
+            .on('zoom', (event) => {
+                g.attr('transform', event.transform);
+            });
+        
+        svg.call(zoom);
+        
+        // 转换 edges 格式：从 {from, to} 转换为 {source, target}，使用节点 ID
+        const edges = (graphData.edges || []).map(e => ({
+            source: e.from,
+            target: e.to,
+            label: e.label || ''
+        }));
+        
+        // 确保所有节点都有 id 字段（如果没有，使用 label）
+        graphData.nodes.forEach((node, i) => {
+            if (!node.id) {
+                node.id = node.label || `node_${i}`;
+            }
+            // 初始化节点坐标
+            if (node.x === undefined || node.x === null) {
+                node.x = width / 2 + (Math.random() - 0.5) * 200;
+            }
+            if (node.y === undefined || node.y === null) {
+                node.y = height / 2 + (Math.random() - 0.5) * 200;
+            }
+        });
+        
+        // 过滤掉无效的边（source 或 target 不在节点列表中）
+        const nodeIds = new Set(graphData.nodes.map(n => n.id));
+        const validEdges = edges.filter(e => nodeIds.has(e.source) && nodeIds.has(e.target));
+        
+        console.log('Valid edges:', validEdges.length, 'out of', edges.length);
+        
+        // 使用层次化布局（更硬汉，静态布局）
+        // 计算层次（基于依赖关系）
+        const levels = {};
+        const visited = new Set();
+        
+        function getLevel(nodeId) {
+            if (levels[nodeId] !== undefined) return levels[nodeId];
+            if (visited.has(nodeId)) return 0; // 防止循环
+            visited.add(nodeId);
+            
+            let maxPrevLevel = -1;
+            validEdges.forEach(e => {
+                if (e.target === nodeId) {
+                    const prevLevel = getLevel(e.source);
+                    maxPrevLevel = Math.max(maxPrevLevel, prevLevel);
+                }
+            });
+            
+            levels[nodeId] = maxPrevLevel + 1;
+            return levels[nodeId];
+        }
+        
+        graphData.nodes.forEach(n => getLevel(n.id));
+        
+        // 按层次分组
+        const nodesByLevel = {};
+        graphData.nodes.forEach(n => {
+            const level = levels[n.id] || 0;
+            if (!nodesByLevel[level]) nodesByLevel[level] = [];
+            nodesByLevel[level].push(n);
+        });
+        
+        // 计算位置（层次化布局）
+        const levelHeight = 150;
+        const nodeSpacing = 150;
+        const startX = 100;
+        
+        Object.keys(nodesByLevel).sort((a, b) => a - b).forEach((level, levelIdx) => {
+            const nodesInLevel = nodesByLevel[level];
+            const levelY = 100 + levelIdx * levelHeight;
+            const totalWidth = nodesInLevel.length * nodeSpacing;
+            const startXOffset = (width - totalWidth) / 2;
+            
+            nodesInLevel.forEach((node, nodeIdx) => {
+                node.x = startXOffset + nodeIdx * nodeSpacing;
+                node.y = levelY;
+                node.fx = node.x; // 固定位置（硬汉风格，不动）
+                node.fy = node.y;
+            });
+        });
+        
+        // 创建简单的 simulation（只用于初始化，不持续运行）
+        const simulation = d3.forceSimulation(graphData.nodes)
+            .force('link', d3.forceLink(validEdges).id(d => d.id).distance(100))
+            .on('end', () => {
+                // 布局完成后，固定所有节点位置
+                graphData.nodes.forEach(n => {
+                    n.fx = n.x;
+                    n.fy = n.y;
+                });
+            });
+        
+        simulation.alpha(0.3).restart();
+        
+        // 边
+        const link = g.append('g')
+            .attr('class', 'links')
+            .selectAll('line')
+            .data(validEdges)
+            .enter()
+            .append('line')
+            .attr('class', 'link')
+            .attr('stroke', '#999')
+            .attr('stroke-width', 2)
+            .attr('stroke-opacity', 0.6);
+        
+        // 节点（硬汉风格：不拖拽，固定位置）
+        const node = g.append('g')
+            .attr('class', 'nodes')
+            .selectAll('g')
+            .data(graphData.nodes)
+            .enter()
+            .append('g')
+            .attr('class', 'node');
+        
+        // 节点矩形（更硬汉的风格）
+        node.append('rect')
+            .attr('width', 120)
+            .attr('height', 40)
+            .attr('x', -60)
+            .attr('y', -20)
+            .attr('rx', 4)
+            .attr('fill', '#fff')
+            .attr('stroke', '#333')
+            .attr('stroke-width', 2);
+        
+        // 节点标签
+        node.append('text')
+            .text(d => d.label || d.id)
+            .attr('text-anchor', 'middle')
+            .attr('dy', 5)
+            .attr('font-size', '12px')
+            .attr('fill', '#000')
+            .attr('font-weight', 'normal')
+            .attr('font-family', 'monospace');
+        
+        // 工具提示
+        const tooltip = d3.select('body')
+            .append('div')
+            .attr('class', 'tooltip')
+            .style('opacity', 0);
+        
+        node.on('mouseover', (event, d) => {
+            tooltip.transition()
+                .duration(200)
+                .style('opacity', .9);
+            tooltip.html(`
+                <strong>${d.label}</strong><br/>
+                Flow: ${d.flow || 'N/A'}<br/>
+                Cmd: ${d.cmd || 'N/A'}<br/>
+                Inputs: ${d.inputs.length}<br/>
+                Outputs: ${d.outputs.length}
+            `)
+                .style('left', (event.pageX + 10) + 'px')
+                .style('top', (event.pageY - 10) + 'px');
+        })
+        .on('mouseout', () => {
+            tooltip.transition()
+                .duration(500)
+                .style('opacity', 0);
+        });
+        
+        // 更新位置（硬汉风格：静态，不持续更新）
+        function updatePositions() {
+            link
+                .attr('x1', d => {
+                    const src = typeof d.source === 'object' ? d.source : graphData.nodes.find(n => n.id === d.source);
+                    return src ? (src.x || 0) : 0;
+                })
+                .attr('y1', d => {
+                    const src = typeof d.source === 'object' ? d.source : graphData.nodes.find(n => n.id === d.source);
+                    return src ? (src.y || 0) : 0;
+                })
+                .attr('x2', d => {
+                    const tgt = typeof d.target === 'object' ? d.target : graphData.nodes.find(n => n.id === d.target);
+                    return tgt ? (tgt.x || 0) : 0;
+                })
+                .attr('y2', d => {
+                    const tgt = typeof d.target === 'object' ? d.target : graphData.nodes.find(n => n.id === d.target);
+                    return tgt ? (tgt.y || 0) : 0;
+                });
+            
+            node.attr('transform', d => `translate(${d.x || 0},${d.y || 0})`);
+        }
+        
+        // 只在 simulation 结束时更新一次
+        simulation.on('end', () => {
+            updatePositions();
+        });
+        
+        // 立即更新一次（如果 simulation 已经结束）
+        setTimeout(updatePositions, 100);
+        
+        // 控制函数
+        function resetZoom() {
+            svg.transition().call(
+                zoom.transform,
+                d3.zoomIdentity
+            );
+        }
+        
+        function centerGraph() {
+            const bounds = g.node().getBBox();
+            const fullWidth = width;
+            const fullHeight = height;
+            const widthScale = fullWidth / bounds.width;
+            const heightScale = fullHeight / bounds.height;
+            const scale = Math.min(widthScale, heightScale) * 0.8;
+            const translate = [
+                fullWidth / 2 - scale * (bounds.x + bounds.width / 2),
+                fullHeight / 2 - scale * (bounds.y + bounds.height / 2)
+            ];
+            svg.transition().call(
+                zoom.transform,
+                d3.zoomIdentity.translate(translate[0], translate[1]).scale(scale)
+            );
+        }
+        
+        // 显示信息
+        const infoText = graphData.metadata ? 
+            `总步骤数: ${graphData.metadata.total_steps || 0} | 显示步骤数: ${graphData.metadata.displayed_steps || 0} | 边数: ${validEdges.length}` :
+            `节点数: ${graphData.nodes.length} | 边数: ${validEdges.length}`;
+        document.getElementById('info').textContent = infoText;
+        
+        // 调试信息
+        console.log('Graph Data:', graphData);
+        console.log('Nodes:', graphData.nodes);
+        console.log('All Edges:', edges);
+        console.log('Valid Edges:', validEdges);
+        console.log('Node IDs:', Array.from(nodeIds));
+        
+        // 如果没有任何边，显示提示
+        if (validEdges.length === 0 && graphData.nodes.length > 0) {
+            console.warn('警告：没有有效的边，节点可能显示为孤立点');
+        }
+        })();
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EDP Metrics Dashboard</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- ECharts -->
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <!-- Vue 3 -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@3.3.4/dist/vue.global.prod.js"></script>
+    <!-- Axios -->
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.6.2/dist/axios.min.js"></script>
+    
+    <style>
+        body { background-color: #f8f9fa; }
+        .card { margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border: none; }
+        .metric-value { font-size: 1.5rem; font-weight: bold; color: #0d6efd; }
+        .chart-container { height: 400px; width: 100%; }
+        .sidebar { height: 100vh; position: sticky; top: 0; background: #fff; border-right: 1px solid #eee; padding: 20px; }
+        .loading-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255,255,255,0.8); z-index: 9999;
+            display: flex; justify-content: center; align-items: center;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <!-- Loading Overlay -->
+        <div class="loading-overlay" v-if="loading">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+
+        <div class="container-fluid">
+            <div class="row">
+                <!-- Sidebar -->
+                <div class="col-md-3 col-lg-2 sidebar">
+                    <h4 class="mb-4">EDP Dashboard</h4>
+                    <div class="mb-3">
+                        <label class="form-label">Run Directory</label>
+                        <input type="text" class="form-control" v-model="runPath" placeholder="Path to data/step...">
+                        <div class="form-text text-muted">e.g. .../data/pnr_innovus.place</div>
+                    </div>
+                    <button class="btn btn-primary w-100" @click="analyze" :disabled="!runPath">
+                        Analyze Metrics
+                    </button>
+                    
+                    <hr>
+                    
+                    <div v-if="metricsData" class="mt-4">
+                        <h6>Summary</h6>
+                        <div class="list-group list-group-flush">
+                            <div class="list-group-item d-flex justify-content-between align-items-center" v-for="(val, key) in flatSummary" :key="key">
+                                {{ formatKey(key) }}
+                                <span class="badge bg-secondary rounded-pill">{{ val }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main Content -->
+                <div class="col-md-9 col-lg-10 p-4">
+                    <div v-if="!metricsData" class="text-center mt-5 pt-5 text-muted">
+                        <h3>Ready to Analyze</h3>
+                        <p>Enter a run directory path on the left to view metrics.</p>
+                    </div>
+
+                    <div v-else>
+                        <h2 class="mb-4">Metrics Analysis: {{ currentStage }}</h2>
+
+                        <!-- Key Metrics Cards -->
+                        <div class="row mb-4">
+                            <div class="col-md-3" v-if="getKeyMetric('utilization')">
+                                <div class="card text-center p-3">
+                                    <div class="text-muted">Utilization</div>
+                                    <div class="metric-value">{{ getKeyMetric('utilization') }}%</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3" v-if="getKeyMetric('timing.setup.reg2reg.wns')">
+                                <div class="card text-center p-3">
+                                    <div class="text-muted">WNS (Reg2Reg)</div>
+                                    <div class="metric-value" :class="{'text-danger': getKeyMetric('timing.setup.reg2reg.wns') < 0}">
+                                        {{ getKeyMetric('timing.setup.reg2reg.wns') }}
+                                    </div>
+                                </div>
+                            </div>
+                             <div class="col-md-3" v-if="getKeyMetric('timing.setup.reg2reg.tns')">
+                                <div class="card text-center p-3">
+                                    <div class="text-muted">TNS (Reg2Reg)</div>
+                                    <div class="metric-value" :class="{'text-danger': getKeyMetric('timing.setup.reg2reg.tns') < 0}">
+                                        {{ getKeyMetric('timing.setup.reg2reg.tns') }}
+                                    </div>
+                                </div>
+                            </div>
+                             <div class="col-md-3" v-if="getKeyMetric('power.total_power')">
+                                <div class="card text-center p-3">
+                                    <div class="text-muted">Total Power</div>
+                                    <div class="metric-value">{{ getKeyMetric('power.total_power') }}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Charts Row 1 -->
+                        <div class="row mb-4">
+                            <!-- Congestion Chart -->
+                            <div class="col-md-6" v-show="hasCategory('congestion')">
+                                <div class="card p-3">
+                                    <h5>Congestion</h5>
+                                    <div id="congestionChart" class="chart-container"></div>
+                                </div>
+                            </div>
+                            <!-- Vt Ratio Chart -->
+                            <div class="col-md-6" v-show="hasCategory('vt_ratio')">
+                                <div class="card p-3">
+                                    <h5>Vt Ratio</h5>
+                                    <div id="vtRatioChart" class="chart-container"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Charts Row 2 -->
+                        <div class="row mb-4">
+                             <!-- Timing WNS Chart -->
+                            <div class="col-md-12" v-show="hasCategory('timing')">
+                                <div class="card p-3">
+                                    <h5>Timing WNS Distribution</h5>
+                                    <div id="timingWnsChart" class="chart-container"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const { createApp, ref, computed, nextTick } = Vue;
+
+        createApp({
+            setup() {
+                const runPath = ref(localStorage.getItem('lastRunPath') || '');
+                const loading = ref(false);
+                const metricsData = ref(null);
+                const currentStage = ref('');
+                
+                let charts = {};
+
+                const analyze = async () => {
+                    if (!runPath.value) return;
+                    
+                    loading.value = true;
+                    localStorage.setItem('lastRunPath', runPath.value);
+                    
+                    try {
+                        const response = await axios.get('/metrics/scan', {
+                            params: { run_path: runPath.value }
+                        });
+                        
+                        if (response.data.success) {
+                            metricsData.value = response.data.data;
+                            // Assume single stage for now or take the first key from summary
+                            currentStage.value = Object.keys(metricsData.value.summary)[0] || 'Unknown';
+                            
+                            await nextTick(); // Wait for DOM update
+                            renderCharts();
+                        } else {
+                            alert('Error: ' + response.data.error);
+                        }
+                    } catch (error) {
+                        alert('Failed to fetch metrics: ' + error.message);
+                    } finally {
+                        loading.value = false;
+                    }
+                };
+
+                const getKeyMetric = (pathStr) => {
+                    if (!metricsData.value) return null;
+                    const categories = metricsData.value.categories;
+                    
+                    // Helper to find value in category list
+                    // pathStr format: "category.sub1.sub2..."
+                    const parts = pathStr.split('.');
+                    const catName = parts[0];
+                    const subPaths = parts.slice(1);
+                    
+                    if (!categories[catName]) return null;
+                    
+                    // Find item matching path
+                    const item = categories[catName].find(i => {
+                        if (subPaths.length === 0) return i.path.length === 0;
+                        // Match subpath
+                        return JSON.stringify(i.path) === JSON.stringify(subPaths);
+                    });
+                    
+                    return item ? item.value : null;
+                };
+                
+                const hasCategory = (cat) => {
+                    return metricsData.value && metricsData.value.categories && metricsData.value.categories[cat];
+                };
+
+                const flatSummary = computed(() => {
+                     if (!metricsData.value || !metricsData.value.summary) return {};
+                     const stage = Object.keys(metricsData.value.summary)[0];
+                     return metricsData.value.summary[stage] || {};
+                });
+                
+                const formatKey = (key) => {
+                    return key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                };
+
+                const renderCharts = () => {
+                    const categories = metricsData.value.categories;
+                    
+                    // 1. Congestion Bar Chart
+                    if (categories.congestion) {
+                        const chartDom = document.getElementById('congestionChart');
+                        if (chartDom) {
+                            const myChart = echarts.init(chartDom);
+                            // Filter out non-numeric or specific items if needed
+                            const data = categories.congestion.map(item => ({
+                                name: item.path.join(' '),
+                                value: item.value
+                            }));
+                            
+                            myChart.setOption({
+                                tooltip: { trigger: 'axis' },
+                                xAxis: { type: 'category', data: data.map(d => d.name), axisLabel: { rotate: 45 } },
+                                yAxis: { type: 'value' },
+                                series: [{ data: data.map(d => d.value), type: 'bar', itemStyle: { color: '#dc3545' } }]
+                            });
+                            charts['congestion'] = myChart;
+                        }
+                    }
+                    
+                    // 2. Vt Ratio Pie Chart
+                    if (categories.vt_ratio) {
+                        const chartDom = document.getElementById('vtRatioChart');
+                        if (chartDom) {
+                            const myChart = echarts.init(chartDom);
+                            const data = categories.vt_ratio.map(item => ({
+                                name: item.path[0].toUpperCase(),
+                                value: item.value
+                            }));
+                            
+                            myChart.setOption({
+                                tooltip: { trigger: 'item' },
+                                legend: { top: '5%', left: 'center' },
+                                series: [{
+                                    type: 'pie', radius: ['40%', '70%'],
+                                    avoidLabelOverlap: false,
+                                    itemStyle: { borderRadius: 10, borderColor: '#fff', borderWidth: 2 },
+                                    label: { show: false, position: 'center' },
+                                    emphasis: { label: { show: true, fontSize: 20, fontWeight: 'bold' } },
+                                    data: data
+                                }]
+                            });
+                            charts['vt_ratio'] = myChart;
+                        }
+                    }
+                    
+                    // 3. Timing WNS Bar Chart (Grouped)
+                    if (categories.timing) {
+                         const chartDom = document.getElementById('timingWnsChart');
+                         if (chartDom) {
+                            const myChart = echarts.init(chartDom);
+                            // Filter only WNS items
+                            const wnsItems = categories.timing.filter(item => item.path.includes('wns'));
+                            
+                            // Extract groups (setup/hold) and paths (reg2reg, etc)
+                            // path: [type, group, metric] e.g. [setup, reg2reg, wns]
+                            const xAxisData = [...new Set(wnsItems.map(item => item.path[1]))]; // reg2reg, in2reg...
+                            
+                            const setupData = xAxisData.map(group => {
+                                const item = wnsItems.find(i => i.path[0] === 'setup' && i.path[1] === group);
+                                return item ? item.value : 0;
+                            });
+                             const holdData = xAxisData.map(group => {
+                                const item = wnsItems.find(i => i.path[0] === 'hold' && i.path[1] === group);
+                                return item ? item.value : 0;
+                            });
+
+                            myChart.setOption({
+                                tooltip: { trigger: 'axis' },
+                                legend: { data: ['Setup WNS', 'Hold WNS'] },
+                                xAxis: { type: 'category', data: xAxisData },
+                                yAxis: { type: 'value' },
+                                series: [
+                                    { name: 'Setup WNS', type: 'bar', data: setupData, itemStyle: { color: '#fd7e14' } },
+                                    { name: 'Hold WNS', type: 'bar', data: holdData, itemStyle: { color: '#20c997' } }
+                                ]
+                            });
+                             charts['timing'] = myChart;
+                         }
+                    }
+                    
+                    // Handle Resize
+                    window.addEventListener('resize', () => {
+                        Object.values(charts).forEach(chart => chart.resize());
+                    });
+                };
+
+                return {
+                    runPath, loading, metricsData, currentStage, flatSummary,
+                    analyze, getKeyMetric, hasCategory, formatKey
+                };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
+

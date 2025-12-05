@@ -1,0 +1,31 @@
+VERSION 5.7 ;
+BUSBITCHARS "[]" ;
+DIVIDERCHAR "/" ;
+
+MACRO sm3_top
+  CLASS BLOCK ;
+  FOREIGN sm3_top 0 0 ;
+  ORIGIN 0 0 ;
+  SIZE 500 BY 1000 ;
+  SYMMETRY X Y R90 ;
+  SITE core ;
+  PIN VDD
+    DIRECTION INOUT ;
+    USE POWER ;
+    SHAPE ABUTMENT ;
+    PORT
+      LAYER metal1 ;
+        RECT 0 0 500 1000 ;
+    END
+  END VDD
+  PIN VSS
+    DIRECTION INOUT ;
+    USE GROUND ;
+    SHAPE ABUTMENT ;
+    PORT
+      LAYER metal1 ;
+        RECT 0 0 500 1000 ;
+    END
+  END VSS
+END sm3_top
+END LIBRARY

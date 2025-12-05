@@ -1,0 +1,17 @@
+pv_calibre:
+  default:
+    lsf: 1
+    tool_opt: "calibre -64 -batch"
+    cpu_num: 16
+    memory: 10000
+    queue: "default"
+    span: 1
+    pre_lsf: ""
+    lsf_opt: "-Ip"
+  ipmerge:
+    cpu_num: 16
+    queue: "default"
+    lsf: 1
+  test_py:
+    tool_opt: "python"
+    lsf: 0

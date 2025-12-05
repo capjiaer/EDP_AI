@@ -1,0 +1,18 @@
+pnr_innovus:
+  dependency:
+    FP_MODE:
+      - place:
+          out: place.pass
+          cmd: place.tcl
+          sub_steps:
+            innovus_restore_design.tcl: pnr_innovus::restore_design
+            innovus_config_design.tcl: pnr_innovus::config_design
+            innovus_add_tie_cell.tcl: pnr_innovus::add_tie_cell
+            innovus_save_design.tcl: pnr_innovus::save_design
+            innovus_report_design.tcl: pnr_innovus::report_design
+            innovus_check_pd.tcl: pnr_innovus::check_pd
+            innovus_save_metrics.tcl: pnr_innovus::save_metrics
+      - postroute:
+          in: place.pass
+          out: postroute.pass
+          cmd: innovus_postroute.tcl

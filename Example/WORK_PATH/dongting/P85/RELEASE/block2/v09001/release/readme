@@ -1,0 +1,21 @@
+sm3_top v09001 Release Notes
+============================
+
+Release Date: 2024-01-15
+Status: Production Ready
+
+Changes:
+- Initial release of sm3_top design
+- Optimized for 800MHz target frequency
+- Area target: 0.5mm²
+- Power budget: 1.2W
+
+Design Files:
+- LEF: sm3_top.lef
+- Verilog: Complete RTL netlist
+- SDF: Timing data
+- SPEF: Parasitic extraction data
+
+Usage:
+- Load with: module load JSF_sm3_top_v09001
+- Design files available in datadir/

@@ -1,0 +1,2 @@
+"""GUI utilities module."""
+

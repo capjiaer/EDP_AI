@@ -1,0 +1,67 @@
+# init_project.yaml - dongting 项目特定的初始化配置
+# 
+# 此文件会覆盖 common/main/init_project.yaml 中的配置
+# 只定义需要覆盖或新增的配置项即可
+#
+# 配置加载顺序：
+# 1. common/main/init_project.yaml (基础配置)
+# 2. {project}/main/init_project.yaml (此文件，会覆盖基础配置)
+
+# 项目特定信息（可选，如果需要覆盖 common 的配置）
+project:
+  # work_path_name: "WORK_PATH"
+  # node_naming_pattern: "P{number}"
+  
+  # dongting 项目允许 init 的工作路径列表（安全控制）
+  # 只有在此列表中的路径才允许执行 init 操作
+  # 支持绝对路径和相对路径（相对于 edp_center 的父目录）
+  # 如果为空列表或未设置，则使用 common 的配置
+  # 
+  # 示例配置（取消注释并修改为实际路径）：
+  # allowed_work_paths:
+  #   - "/absolute/path/to/WORK_PATH"  # 绝对路径
+  #   - "Example/WORK_PATH"            # 相对路径（相对于 edp_center 的父目录）
+  #   - "/another/allowed/WORK_PATH"   # 多个允许的路径
+  allowed_work_paths: []  # 空列表表示使用 common 的配置
+  
+  # dongting 项目特定的块列表
+  # 如果此项目需要额外的 blocks，可以在这里定义
+  # 注意：如果定义了 blocks，会完全替换 common 中的 blocks
+  # 如果想保留 common 的 blocks 并添加新的，需要在项目初始化代码中处理
+  blocks:
+    - name: block1
+      description: "dongting 项目块1"
+    - name: block2
+      description: "dongting 项目块2"
+    # 如果需要添加额外的块，可以取消注释下面的行
+    # - name: block3
+    #   description: "dongting 项目块3"
+
+# EDP 平台相关配置（可选，如果需要覆盖 common 的配置）
+# edp:
+#   branch_template:
+#     directories:
+#       - cmds
+#       - dbs
+#       - flow
+#       - hooks
+#       - logs
+#       - rpts
+#       - runs
+#       # 如果需要添加额外的目录，可以在这里添加
+#       # - custom_dir
+#     
+#     files:
+#       - user_config.tcl
+#       - user_config.yaml
+#       # 如果需要添加额外的文件，可以在这里添加
+#       # - custom_config.yaml
+
+# 项目特定的额外配置（可选）
+# dongting_specific:
+#   # 例如：dongting 项目特有的配置
+#   default_block_count: 2
+#   custom_settings:
+#     setting1: "value1"
+#     setting2: "value2"
+

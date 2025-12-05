@@ -1,0 +1,30 @@
+{
+  "generated_at": "2025-11-12T10:54:20.137960",
+  "edp_center_path": "C:\\Users\\anping.chen\\Desktop\\EDP_AI\\edp_center",
+  "projects": {
+    "SAMSUNG/S4": [],
+    "SAMSUNG/S8": [
+      "dongting"
+    ]
+  },
+  "foundries": [
+    "SAMSUNG",
+    "TSMC"
+  ],
+  "nodes": {
+    "SAMSUNG": [
+      "S4",
+      "S8"
+    ],
+    "TSMC": []
+  },
+  "flows": {
+    "SAMSUNG/S8/dongting": [
+      "pnr_innovus",
+      "pv_calibre"
+    ]
+  },
+  "blocks": {},
+  "users": {},
+  "versions": []
+}

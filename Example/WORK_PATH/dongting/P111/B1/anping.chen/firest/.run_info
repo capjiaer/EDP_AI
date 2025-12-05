@@ -1,0 +1,36 @@
+runs:
+- timestamp: '2025-12-03 15:23:22'
+  flow: pnr_innovus
+  step: place
+  hooks:
+    step: []
+  status: failed
+  duration: 0.11
+- timestamp: '2025-12-03 15:31:39'
+  flow: pnr_innovus
+  step: place
+  hooks:
+    step: []
+  status: failed
+  duration: 0.18
+- timestamp: '2025-12-03 15:32:52'
+  flow: pnr_innovus
+  step: place
+  hooks:
+    step: []
+  status: failed
+  duration: 0.13
+- timestamp: '2025-12-03 15:33:29'
+  flow: pnr_innovus
+  step: place
+  hooks:
+    step: []
+  status: failed
+  duration: 0.11
+- timestamp: '2025-12-03 15:40:04'
+  flow: pnr_innovus
+  step: place
+  hooks:
+    step: []
+  status: failed
+  duration: 0.2

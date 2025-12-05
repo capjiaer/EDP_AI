@@ -1,0 +1,7 @@
+ready: true
+note: "Stable release - Production ready"
+created_date: "2024-01-15"
+design_name: "sm3_top"
+version: "v09001"
+target_frequency: 800
+target_area: 0.5

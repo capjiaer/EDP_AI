@@ -1,0 +1,22 @@
+sm3_top v09002 Release Notes
+============================
+
+Release Date: 2024-01-20
+Status: Production Ready
+
+Changes:
+- Performance optimization: 900MHz target frequency
+- Area reduction: 0.45mm² (10% improvement)
+- Power optimization: 1.1W (8% improvement)
+- Updated timing constraints
+- Enhanced LEF files
+
+Design Files:
+- LEF: sm3_top.lef (updated)
+- Verilog: Complete RTL netlist
+- SDF: Updated timing data
+- SPEF: Re-extracted parasitic data
+
+Usage:
+- Load with: module load JSF_sm3_top_v09002
+- Design files available in datadir/

@@ -1,0 +1,161 @@
+# ============================================================================
+# pnr_innovus Flow 依赖关系配置文件
+# ============================================================================
+# 此文件定义了 pnr_innovus flow 的步骤依赖关系和执行顺序
+# ============================================================================
+
+pnr_innovus:
+  dependency:
+    # ------------------------------------------------------------------------
+    # Step 1: floorplan（布局规划）
+    # ------------------------------------------------------------------------
+    # 说明：
+    #   - out: 输出标记文件（用于依赖检查）
+    #   - cmd: 主脚本文件名（在 cmds/pnr_innovus/ 目录下）
+    #   - sub_steps: 子步骤列表（每个子步骤对应一个 proc）
+    #     格式：脚本文件名: proc名称
+    # ------------------------------------------------------------------------
+    - floorplan:
+        out: floorplan.pass          # 输出标记文件，表示 floorplan 完成
+        cmd: floorplan.tcl           # 主脚本文件：cmds/pnr_innovus/floorplan.tcl
+        sub_steps:
+          # 设计导入相关
+          import_design.tcl: pnr_innovus::import_design
+          load_scan_def.tcl: pnr_innovus::load_scan_def
+          load_power_intent.tcl: pnr_innovus::load_power_intent
+          
+          # 设计配置相关
+          config_design.tcl: pnr_innovus::config_design
+          config_timing.tcl: pnr_innovus::config_timing
+          
+          # Floorplan 初始化
+          init_fplan.tcl: pnr_innovus::init_fplan
+          load_fplan_snapshot.tcl: pnr_innovus::load_fplan_snapshot
+          
+          # 物理设计相关
+          legalize_macro.tcl: pnr_innovus::legalize_macro
+          add_endcap.tcl: pnr_innovus::add_endcap
+          add_welltap.tcl: pnr_innovus::add_welltap
+          route_power.tcl: pnr_innovus::route_power
+          add_ip_pg.tcl: pnr_innovus::add_ip_pg
+          legalize_pin_assignment.tcl: pnr_innovus::legalize_pin_assignment
+          
+          # 快照和保存
+          capture_fplan_snapshot.tcl: pnr_innovus::capture_fplan_snapshot
+          add_port_affinity.tcl: pnr_innovus::add_port_affinity
+          
+          # 报告和检查
+          save_design.tcl: pnr_innovus::save_design
+          report_design.tcl: pnr_innovus::report_design
+          check_pd.tcl: pnr_innovus::check_pd
+          save_metrics.tcl: pnr_innovus::save_metrics
+    
+    # ------------------------------------------------------------------------
+    # Step 2: place（布局）
+    # ------------------------------------------------------------------------
+    # 说明：
+    #   - in: 输入依赖（可选，表示需要 floorplan.pass 文件存在）
+    #   - out: 输出标记文件
+    #   - cmd: 主脚本文件
+    #   - sub_steps: 子步骤列表
+    # ------------------------------------------------------------------------
+    - place:
+        in: floorplan.pass            # 依赖 floorplan 步骤的输出
+        out: place.pass                # 输出标记文件，表示 place 完成
+        cmd: place.tcl                 # 主脚本文件：cmds/pnr_innovus/place.tcl
+        sub_steps:
+          # 恢复设计
+          innovus_restore_design.tcl: pnr_innovus::restore_design
+          
+          # 设计配置
+          innovus_config_design.tcl: pnr_innovus::config_design
+          innovus_add_tie_cell.tcl: pnr_innovus::add_tie_cell
+          
+          # 保存和报告
+          innovus_save_design.tcl: pnr_innovus::save_design
+          innovus_report_design.tcl: pnr_innovus::report_design
+          innovus_check_pd.tcl: pnr_innovus::check_pd
+          innovus_save_metrics.tcl: pnr_innovus::save_metrics
+    
+    # ------------------------------------------------------------------------
+    # Step 3: cts（时钟树综合）
+    # ------------------------------------------------------------------------
+    - cts:
+        in: place.pass                 # 依赖 place 步骤的输出
+        out: cts.pass                  # 输出标记文件
+        cmd: cts.tcl                   # 主脚本文件：cmds/pnr_innovus/cts.tcl
+        sub_steps:
+          innovus_restore_design.tcl: pnr_innovus::restore_design
+          innovus_config_design.tcl: pnr_innovus::config_design
+          clock_tree_synthesis.tcl: pnr_innovus::clock_tree_synthesis
+          innovus_save_design.tcl: pnr_innovus::save_design
+          innovus_report_design.tcl: pnr_innovus::report_design
+          innovus_check_pd.tcl: pnr_innovus::check_pd
+          innovus_save_metrics.tcl: pnr_innovus::save_metrics
+    
+    # ------------------------------------------------------------------------
+    # Step 4: route（布线）
+    # ------------------------------------------------------------------------
+    - route:
+        in: cts.pass                   # 依赖 cts 步骤的输出
+        out: route.pass                # 输出标记文件
+        cmd: route.tcl                 # 主脚本文件：cmds/pnr_innovus/route.tcl
+        sub_steps:
+          innovus_restore_design.tcl: pnr_innovus::restore_design
+          innovus_config_design.tcl: pnr_innovus::config_design
+          route_design.tcl: pnr_innovus::route_design
+          innovus_save_design.tcl: pnr_innovus::save_design
+          innovus_report_design.tcl: pnr_innovus::report_design
+          innovus_check_pd.tcl: pnr_innovus::check_pd
+          innovus_save_metrics.tcl: pnr_innovus::save_metrics
+    
+    # ------------------------------------------------------------------------
+    # Step 5: postroute（后布线优化）
+    # ------------------------------------------------------------------------
+    - postroute:
+        in: route.pass                 # 依赖 route 步骤的输出
+        out: postroute.pass            # 输出标记文件
+        cmd: postroute.tcl             # 主脚本文件：cmds/pnr_innovus/postroute.tcl
+        sub_steps:
+          innovus_restore_design.tcl: pnr_innovus::restore_design
+          innovus_config_design.tcl: pnr_innovus::config_design
+          postroute_optimization.tcl: pnr_innovus::postroute_optimization
+          extract_rc.tcl: pnr_innovus::extract_rc
+          timing_analysis.tcl: pnr_innovus::timing_analysis
+          innovus_save_design.tcl: pnr_innovus::save_design
+          innovus_report_design.tcl: pnr_innovus::report_design
+          innovus_check_pd.tcl: pnr_innovus::check_pd
+          innovus_save_metrics.tcl: pnr_innovus::save_metrics
+
+# ============================================================================
+# 配置说明：
+# ============================================================================
+# 1. 依赖关系：
+#    - in: 输入依赖（可选），表示需要前置步骤的输出标记文件
+#    - out: 输出标记文件，表示该步骤完成
+#    - 框架会根据 in/out 自动构建依赖图
+#
+# 2. 执行顺序：
+#    floorplan -> place -> cts -> route -> postroute
+#
+# 3. sub_steps：
+#    - 每个 sub_step 对应一个 Tcl 脚本文件和一个 proc
+#    - 脚本文件位于：flow/initialize/{foundry}/{node}/{project}/cmds/{flow}/proc/
+#    - proc 格式：{namespace}::{proc_name}
+#    - 框架会自动生成 sub_steps 的调用代码
+#
+# 4. 标记文件（.pass）：
+#    - 用于检查步骤是否完成
+#    - 位于：runs/{flow}.{step}/ 目录下
+#    - 如果标记文件存在，框架会跳过已完成的步骤（除非使用 --force）
+#
+# 5. 条件依赖（高级用法）：
+#    可以使用模式（如 FP_MODE）来定义不同的执行路径：
+#    pnr_innovus:
+#      dependency:
+#        FP_MODE:
+#          - place: ...
+#          - postroute: ...
+#    这样可以根据配置变量选择不同的执行路径
+# ============================================================================
+

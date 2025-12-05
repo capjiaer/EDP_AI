@@ -1,0 +1,2 @@
+# Step pre hook - executed at the beginning of place step
+# Add code here that needs to be executed before the step starts

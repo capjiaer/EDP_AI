@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EDP 工作流执行系统</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://unpkg.com/dagre@0.8.5/dist/dagre.min.js"></script>
+    <script src="https://unpkg.com/dagre-d3@0.6.4/dist/dagre-d3.min.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="app-container">
+        <div class="header">
+            <div>
+                <h1>🚀 EDP 工作流执行系统</h1>
+                <div class="subtitle">可视化依赖关系 · 一键执行步骤</div>
+            </div>
+            <div class="status-badge" id="status-badge">就绪</div>
+        </div>
+        
+        <div class="toolbar">
+            <button class="btn btn-primary" onclick="loadWorkflow()">
+                <span>🔄</span> 刷新工作流
+            </button>
+            <button class="btn btn-secondary" onclick="clearStatus()">
+                <span>🗑️</span> 清除状态
+            </button>
+            <div style="flex: 1;"></div>
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-label">总步骤</div>
+                    <div class="stat-value" id="stat-total">-</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">已完成</div>
+                    <div class="stat-value" id="stat-success">-</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">运行中</div>
+                    <div class="stat-value" id="stat-running">-</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">失败</div>
+                    <div class="stat-value" id="stat-failed">-</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <div class="graph-panel">
+                <div id="graph-container"></div>
+            </div>
+            
+            <div class="log-panel">
+                <h3>📋 执行日志</h3>
+                <div id="log-container"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    <script>
+        // 全局拦截所有可能的文件打开行为
+        (function() {
+            // 拦截所有链接点击
+            document.addEventListener('click', function(event) {
+                const target = event.target;
+                // 如果点击的是 SVG 内的元素，且不是我们的节点，阻止默认行为
+                if (target.closest && target.closest('#graph-container')) {
+                    const nodeElement = target.closest('g.node');
+                    if (!nodeElement || nodeElement.getAttribute('data-has-handler') !== 'true') {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        event.stopImmediatePropagation();
+                        return false;
+                    }
+                }
+            }, true);  // 使用 capture 阶段
+            
+            // 拦截所有 mousedown 事件
+            document.addEventListener('mousedown', function(event) {
+                const target = event.target;
+                if (target.closest && target.closest('#graph-container')) {
+                    const nodeElement = target.closest('g.node');
+                    if (!nodeElement || nodeElement.getAttribute('data-has-handler') !== 'true') {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        event.stopImmediatePropagation();
+                        return false;
+                    }
+                }
+            }, true);
+            
+            // 拦截所有可能的文件打开行为
+            window.addEventListener('beforeunload', function(event) {
+                // 不阻止页面卸载，只是确保没有文件打开
+            });
+        })();
+    </script>
+</body>
+</html>
+
