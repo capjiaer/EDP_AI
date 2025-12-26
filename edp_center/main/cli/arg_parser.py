@@ -127,6 +127,22 @@ def _add_view_args(parser: argparse.ArgumentParser) -> None:
     )
 
 
+def _add_stats_web_args(parser: argparse.ArgumentParser) -> None:
+    """添加 -stats-web 相关参数"""
+    parser.add_argument(
+        '-stats-web', '--stats-web',
+        action='store_true',
+        dest='stats_web',
+        help='启动性能分析 Web 服务器（使用浏览器访问）'
+    )
+    parser.add_argument(
+        '--stats-port',
+        type=int,
+        default=8889,
+        help='性能分析 Web 服务器端口（默认: 8889）'
+    )
+
+
 def _add_gui_args(parser: argparse.ArgumentParser) -> None:
     """添加 -gui 相关参数"""
     parser.add_argument(
@@ -551,6 +567,7 @@ def create_parser() -> argparse.ArgumentParser:
     _add_release_args(parser)
     _add_workflow_web_args(parser)
     _add_view_args(parser)
+    _add_stats_web_args(parser)
     _add_gui_args(parser)
     _add_graph_args(parser)
     _add_tutorial_args(parser)
