@@ -11,7 +11,7 @@ import unittest
 import yaml
 from tkinter import Tcl
 
-from configkit import (
+from edp_center.packages.edp_configkit import (
     merge_dict,
     yamlfiles2dict,
     value_format_py2tcl,

@@ -38,7 +38,7 @@ def main():
     # 处理 -branch 命令
     if args.branch:
         manager = create_manager(edp_center_path)
-        from .commands import handle_init_workspace
+        from .commands import handle_create_branch
         
         # 创建一个临时的 args 对象来传递参数
         class BranchArgs:
@@ -54,7 +54,7 @@ def main():
                 self.from_branch_step = args.from_branch_step
         
         branch_args = BranchArgs(args)
-        return handle_init_workspace(manager, branch_args)
+        return handle_create_branch(manager, branch_args)
     
     # 处理 -release 命令
     if args.release:

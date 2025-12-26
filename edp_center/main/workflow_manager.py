@@ -17,7 +17,7 @@ from typing import Optional, List, Dict, Union, Any
 
 # 导入四个 KIT
 from edp_center.packages.edp_dirkit import ProjectInitializer, WorkPathInitializer
-from edp_center.packages.edp_configkit.configkit.configkit import files2dict
+from edp_center.packages.edp_configkit import files2dict
 from edp_center.packages.edp_cmdkit import CmdProcessor
 from edp_center.packages.edp_flowkit.flowkit import Graph, execute_all_steps, ICCommandExecutor
 

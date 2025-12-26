@@ -17,6 +17,56 @@ pv_calibre:
     cpu_num: 16
 ```
 
+#### 变量引用（Variable References）
+
+YAML 配置文件支持变量引用功能，可以在配置文件中引用其他变量的值：
+
+**简单变量引用**:
+```yaml
+base_cpu: 16
+pv_calibre:
+  ipmerge:
+    cpu_num: $base_cpu        # 引用 base_cpu
+  drc:
+    cpu_num: ${base_cpu}      # 使用大括号（推荐）
+```
+
+**嵌套字典引用**:
+```yaml
+database:
+  host: localhost
+  port: 5432
+db_url: "postgres://${database(host)}:${database(port)}/mydb"
+```
+
+**深层嵌套引用**:
+```yaml
+app:
+  config:
+    timeout: 30
+timeout_value: $app(config,timeout)
+```
+
+**字符串中的变量引用**:
+```yaml
+prefix: "http://"
+suffix: "/api"
+api_url: "${prefix}example.com${suffix}"
+```
+
+**支持的变量引用格式**:
+- `$var` - 简单变量引用
+- `${var}` - 带大括号的变量引用（**推荐**，避免歧义）
+- `$var(key)` - 嵌套字典引用（一层嵌套）
+- `$var(key1,key2)` - 嵌套字典引用（多层嵌套）
+- `"prefix_${var}_suffix"` - 字符串中的变量引用
+
+**注意事项**:
+- 变量展开后类型为字符串（即使原值是数字）
+- 后面的变量可以引用前面定义的变量
+- 多文件加载时，后面的文件可以引用前面文件定义的变量
+- 推荐使用 `${var}` 格式，避免变量名歧义
+
 #### 完整方式（带元数据：保护、约束、描述）
 
 ```yaml
@@ -494,6 +544,20 @@ floorplan:
 7. `user_config.yaml` 或 `user_config.tcl` - 用户配置（**最高优先级**）
 
 **后加载的配置会覆盖先加载的配置。**
+
+**变量引用规则**:
+- ✅ 后面的配置文件可以引用前面配置文件定义的变量
+- ✅ 同一配置文件内，后面的变量可以引用前面定义的变量
+- ✅ 变量引用会在配置加载时自动展开
+
+**示例**:
+```yaml
+# common/main/config.yaml
+base_path: "/work/data"
+
+# {project}/main/config.yaml
+output_path: "${base_path}/output"  # ✅ 可以引用 common 中定义的 base_path
+```
 
 ---
 

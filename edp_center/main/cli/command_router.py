@@ -11,10 +11,8 @@ from pathlib import Path
 
 from ..workflow_manager import WorkflowManager
 from .commands import (
-    handle_init_project, handle_init_workspace,
+    handle_init_project,
     handle_run_cmd, handle_info_cmd,
-    handle_load_config, handle_process_script,
-    handle_load_workflow, handle_run_workflow,
     handle_create_project
 )
 from .commands.graph_handler import handle_graph_cmd
@@ -98,7 +96,13 @@ def route_shortcut_commands(args) -> int:
     # 检查是否提供了 -graph 选项
     has_graph = getattr(args, 'graph', False)
     
-    if not (args.init or args.branch or args.run or has_info_flag or has_create_project or has_tutorial or has_release or has_graph):
+    # 检查信息查询相关选项
+    has_history = args.history is not None
+    has_stats = args.stats is not None
+    has_rollback = args.rollback is not None
+    has_validate = args.validate is not None
+    
+    if not (args.init or args.branch or args.run or has_info_flag or has_create_project or has_tutorial or has_release or has_graph or has_history or has_stats or has_rollback or has_validate):
         return None
     
     # 自动检测 edp_center 路径
@@ -137,7 +141,8 @@ def route_shortcut_commands(args) -> int:
                 self.from_branch_step = args.from_branch_step
         
         branch_args = BranchArgs(args)
-        return handle_init_workspace(manager, branch_args)
+        from .commands import handle_create_branch
+        return handle_create_branch(manager, branch_args)
     elif args.run:
         # 处理 -run 命令
         return handle_run_cmd(manager, args)
@@ -170,17 +175,34 @@ def route_shortcut_commands(args) -> int:
         graph_args = GraphArgs(args)
         return handle_graph_cmd(manager, graph_args)
     else:
-        # 处理 -info 命令（检查命令行中是否包含 -info 或 -i）
+        # 处理信息查询相关命令
         has_info_flag = any(arg in ('-i', '-info', '--info') for arg in sys.argv)
         if has_info_flag:
             return handle_info_cmd(manager, args)
+        elif args.history is not None:
+            # TODO: 实现历史查询功能
+            print("⚠️  历史查询功能正在开发中，敬请期待", file=sys.stderr)
+            print("   提示: 可以查看 .run_info 文件获取运行历史", file=sys.stderr)
+            return 0
+        elif args.stats is not None:
+            # TODO: 实现性能分析功能
+            print("⚠️  性能分析功能正在开发中，敬请期待", file=sys.stderr)
+            return 0
+        elif args.rollback is not None:
+            # TODO: 实现回滚功能
+            print("⚠️  回滚功能正在开发中，敬请期待", file=sys.stderr)
+            return 0
+        elif args.validate is not None:
+            # TODO: 实现结果验证功能
+            print("⚠️  结果验证功能正在开发中，敬请期待", file=sys.stderr)
+            return 0
     
     return None
 
 
 def route_subcommands(args) -> int:
     """
-    处理子命令（init-workspace, load-config, process-script, load-workflow, run）
+    处理子命令
     
     Args:
         args: 命令行参数对象
@@ -191,30 +213,7 @@ def route_subcommands(args) -> int:
     if not args.command:
         return None
     
-    # 自动检测 edp_center 路径
-    edp_center_path = find_edp_center_path(args)
-    
-    # 创建 WorkflowManager
-    manager = create_manager(edp_center_path)
-    
-    # 执行命令
-    try:
-        if args.command == 'init-workspace':
-            return handle_init_workspace(manager, args)
-        elif args.command == 'load-config':
-            return handle_load_config(manager, args)
-        elif args.command == 'process-script':
-            return handle_process_script(manager, args)
-        elif args.command == 'load-workflow':
-            return handle_load_workflow(manager, args)
-        elif args.command == 'run':
-            return handle_run_workflow(manager, args)
-        else:
-            print(f"错误: 未知命令: {args.command}", file=sys.stderr)
-            return 1
-    except Exception as e:
-        print(f"错误: {e}", file=sys.stderr)
-        import traceback
-        traceback.print_exc()
-        return 1
+    # 如果还有子命令，在这里处理
+    print(f"错误: 未知命令: {args.command}", file=sys.stderr)
+    return 1
 

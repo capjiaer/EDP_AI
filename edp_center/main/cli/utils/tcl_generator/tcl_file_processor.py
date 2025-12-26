@@ -11,7 +11,7 @@ import sys
 from pathlib import Path
 from typing import Dict, Set
 from tkinter import Tcl
-from edp_center.packages.edp_configkit.configkit.configkit import tclinterp2dict
+from edp_center.packages.edp_configkit import tclinterp2dict
 
 from .tcl_type_handler import save_type_info, restore_type_info
 from .tcl_expander import expand_variable_references

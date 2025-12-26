@@ -8,7 +8,7 @@ Blocks 处理模块
 
 from typing import Dict
 from tkinter import Tcl
-from edp_center.packages.edp_configkit.configkit.configkit import dict2tclinterp
+from edp_center.packages.edp_configkit import dict2tclinterp
 
 from .tcl_type_handler import restore_type_info
 from .tcl_expander import expand_variable_references

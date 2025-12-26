@@ -34,7 +34,7 @@ def _add_branch_args(parser: argparse.ArgumentParser) -> None:
         help='创建新的 branch（分支名称，如 branch1）'
     )
     parser.add_argument(
-        '--from-branch-step',
+        '--from-branch-step', '-from-step',
         help='从指定分支的步骤创建新分支（如 "branch1:pnr_innovus.init"）'
     )
 
@@ -47,7 +47,7 @@ def _add_release_args(parser: argparse.ArgumentParser) -> None:
         help='创建 RELEASE（发布运行结果）'
     )
     parser.add_argument(
-        '--release-version',
+        '--release-version', '-rver',
         dest='release_version',
         help='RELEASE 版本号（如 v09001）'
     )
@@ -58,7 +58,7 @@ def _add_release_args(parser: argparse.ArgumentParser) -> None:
         help='要发布的步骤（格式: flow_name.step_name，如 pnr_innovus.postroute）。可多次指定以 release 多个步骤，或指定 flow_name 以 release 整个 flow'
     )
     parser.add_argument(
-        '--release-block',
+        '--release-block', '-rblock',
         dest='release_block',
         help='块名称（如 block1，默认：从当前目录自动推断）'
     )
@@ -106,7 +106,7 @@ def _add_workflow_web_args(parser: argparse.ArgumentParser) -> None:
         help='启动工作流 Web 服务器（使用浏览器访问）'
     )
     parser.add_argument(
-        '--web-port',
+        '--web-port', '-port',
         type=int,
         default=8888,
         help='Web 服务器端口（默认: 8888）'
@@ -144,14 +144,14 @@ def _add_graph_args(parser: argparse.ArgumentParser) -> None:
         help='生成依赖关系可视化图'
     )
     parser.add_argument(
-        '--graph-format', '--format',
+        '--graph-format', '--format', '-format',
         dest='graph_format',
         choices=['text', 'dot', 'png', 'svg', 'pdf', 'mermaid', 'web'],
         default='text',
         help='输出格式：text=文本树形图（默认），dot=Graphviz DOT，png/svg/pdf=图片，mermaid=Mermaid图表，web=交互式HTML'
     )
     parser.add_argument(
-        '--graph-output', '--output',
+        '--graph-output', '--output', '-output',
         dest='graph_output',
         help='输出文件路径（可选，默认输出到控制台或生成默认文件名）'
     )
@@ -191,7 +191,7 @@ def _add_tutorial_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         '-tutorial', '--tutorial', '-tutor',
         action='store_true',
-        help='生成教程 HTML 索引并在浏览器中打开（快捷方式，等同于 edp_info -tutorial）'
+        help='生成教程 HTML 索引并在浏览器中打开'
     )
     parser.add_argument(
         '--open-dir',
@@ -216,6 +216,119 @@ def _add_tutorial_args(parser: argparse.ArgumentParser) -> None:
     )
 
 
+def _add_info_args(parser: argparse.ArgumentParser):
+    """添加信息查询相关参数（-info, -history, -stats, -rollback, -validate）"""
+    # ==================== -info 选项 ====================
+    info_arg = parser.add_argument(
+        '-i', '-info', '--info',
+        dest='info',
+        nargs='?',  # 可选参数：不提供时显示所有 flow，提供时显示指定 flow 的 step
+        metavar='FLOW',  # 明确指定参数名称
+        help='显示 flow 信息（不提供参数时显示所有 flow，提供 flow_name 时显示该 flow 下所有 step 的状态）'
+    )
+    
+    # ==================== -history 选项 ====================
+    parser.add_argument(
+        '-history', '--history', '-hist',
+        dest='history',
+        nargs='?',  # 可选参数
+        metavar='FLOW.STEP',
+        help='查看运行历史（不提供参数时显示所有历史，提供 flow.step 时显示指定步骤的历史）'
+    )
+    parser.add_argument(
+        '--limit',
+        type=int,
+        default=None,
+        help='限制显示的历史记录数量（用于 -history 选项）'
+    )
+    parser.add_argument(
+        '--status',
+        type=str,
+        choices=['success', 'failed', 'running', 'cancelled'],
+        default=None,
+        help='过滤历史记录的状态（用于 -history 选项）'
+    )
+    parser.add_argument(
+        '--from-date',
+        type=str,
+        dest='history_from',
+        help='历史记录的起始时间（用于 -history 选项，格式: YYYY-MM-DD）'
+    )
+    parser.add_argument(
+        '--to-date',
+        type=str,
+        dest='history_to',
+        help='历史记录的结束时间（用于 -history 选项，格式: YYYY-MM-DD）'
+    )
+    
+    # ==================== -stats 选项 ====================
+    parser.add_argument(
+        '-stats', '--stats',
+        dest='stats',
+        nargs='?',  # 可选参数
+        metavar='FLOW.STEP',
+        help='性能统计（不提供参数时显示所有步骤的统计，提供 flow.step 时显示指定步骤的统计）'
+    )
+    parser.add_argument(
+        '--trend',
+        action='store_true',
+        help='显示性能趋势（用于 -stats 选项）'
+    )
+    parser.add_argument(
+        '--export',
+        type=str,
+        help='导出性能报告到文件（用于 -stats 选项，例如: --export report.html）'
+    )
+    
+    # ==================== -rollback 选项 ====================
+    parser.add_argument(
+        '-rollback', '--rollback',
+        dest='rollback',
+        nargs='?',  # 可选参数
+        metavar='FLOW.STEP',
+        help='回滚到历史状态（不提供参数时回滚到上一次成功，提供 flow.step 时回滚到指定步骤的最后一次成功）'
+    )
+    parser.add_argument(
+        '--index',
+        type=int,
+        help='回滚到指定的历史记录索引（用于 -rollback 选项）'
+    )
+    parser.add_argument(
+        '--to-time',
+        type=str,
+        dest='rollback_to_time',
+        help='回滚到指定时间点（用于 -rollback 选项，格式: YYYY-MM-DD HH:MM:SS）'
+    )
+    parser.add_argument(
+        '--preview',
+        action='store_true',
+        dest='rollback_dry_run',
+        help='预览回滚操作，不实际执行（用于 -rollback 选项）'
+    )
+    
+    # ==================== -validate 选项 ====================
+    parser.add_argument(
+        '-validate', '--validate', '-val',
+        dest='validate',
+        nargs='?',  # 可选参数
+        metavar='FLOW.STEP',
+        help='验证执行结果（不提供参数时验证最后一次执行，提供 flow.step 时验证指定步骤）'
+    )
+    parser.add_argument(
+        '--timing-compare', '-tcompare',
+        nargs=2,
+        metavar=('BRANCH1', 'BRANCH2'),
+        help='Timing compare：对比两个分支的结果（用于 -validate 选项）'
+    )
+    parser.add_argument(
+        '--report',
+        action='store_true',
+        help='生成验证报告（用于 -validate 选项）'
+    )
+    
+    return info_arg  # 返回 info_arg 用于补全功能
+
+
 def _add_lib_args(parser: argparse.ArgumentParser) -> None:
     """添加 -lib 相关参数"""
     parser.add_argument(
@@ -224,7 +337,7 @@ def _add_lib_args(parser: argparse.ArgumentParser) -> None:
         help='生成库配置文件（lib_config.tcl）'
     )
     parser.add_argument(
-        '--lib-path',
+        '--lib-path', '-lpath',
         type=str,
         nargs='+',
         help='库目录路径（可以指定多个，或使用 --lib-paths-file）'
@@ -250,7 +363,7 @@ def _add_lib_args(parser: argparse.ArgumentParser) -> None:
         help='处理所有版本：最新版本生成 lib_config.tcl，其他版本生成 lib_config.{version}.tcl。与 --lib-version 互斥'
     )
     parser.add_argument(
-        '--lib-output-dir',
+        '--lib-output-dir', '-odir',
         type=str,
         help='lib_config.tcl输出目录（必须指定）'
     )
@@ -291,7 +404,7 @@ def _add_run_args(parser: argparse.ArgumentParser) -> None:
         help='执行范围：skip-upstream=跳过上游步骤，skip-downstream=跳过下游步骤，all=执行所有相关步骤（默认）'
     )
     parser.add_argument(
-        '--work-path',
+        '--work-path', '-wpath',
         default='.',
         help='WORK_PATH 根目录路径（默认：当前目录）'
     )
@@ -346,26 +459,8 @@ def _add_common_args(parser: argparse.ArgumentParser) -> None:
 
 def _add_legacy_command_args(parser: argparse.ArgumentParser) -> None:
     """添加旧版命令参数（向后兼容）"""
-    # ==================== init-workspace 命令 ====================
-    parser.add_argument(
-        'init-workspace',
-        nargs='?',
-        help='初始化用户工作空间（旧版命令，建议使用 -b/--branch）'
-    )
-    
-    # ==================== load-config 命令 ====================
-    parser.add_argument(
-        'load-config',
-        nargs='?',
-        help='加载配置文件（旧版命令）'
-    )
-    
-    # ==================== process-script 命令 ====================
-    parser.add_argument(
-        'process-script',
-        nargs='?',
-        help='处理脚本（旧版命令）'
-    )
+    # 已移除 init-workspace，请使用 -b/--branch
+    pass
 
 
 def create_parser() -> argparse.ArgumentParser:
@@ -398,6 +493,9 @@ def create_parser() -> argparse.ArgumentParser:
   # 运行流程/步骤（显式指定项目信息）
   edp -run pv_calibre.ipmerge -prj dongting --foundry SAMSUNG --node S8
   
+  # 运行流程/步骤（指定完整路径信息）
+  edp -run pv_calibre.ipmerge -prj dongting -v P85 --block block1 --user zhangsan --branch branch1
+  
   # 演示模式：只显示构建的命令，不实际执行
   edp -run pv_calibre.ipmerge --dry-run
   
@@ -413,55 +511,37 @@ def create_parser() -> argparse.ArgumentParser:
   edp -tutor --update --force  # 强制重新生成所有 HTML
   edp -tutor --browser firefox  # 指定浏览器
   
-  # 创建 RELEASE（发布运行结果）
-  edp -release --release-version v09001 --step pnr_innovus.postroute
-  edp -release --release-version v09001 --step pnr_innovus.postroute --note "Initial release"
-  edp -release --release-version v09001 --step pnr_innovus.postroute --strict  # 如果版本存在则报错（默认会自动添加时间戳创建新版本）
+  # 创建 RELEASE（发布运行结果，使用别名）
+  edp -release -rver v09001 --step pnr_innovus.postroute
+  edp -release -rver v09001 --step pnr_innovus.postroute --note "Initial release"
+  edp -release -rver v09001 --step pnr_innovus.postroute --strict  # 如果版本存在则报错（默认会自动添加时间戳创建新版本）
   
   # 追加到现有版本
-  edp -release --release-version v09001 --step pnr_innovus.route --append  # 追加新步骤到 v09001
-  edp -release --release-version v09001 --step pnr_innovus.postroute --append --overwrite  # 覆盖已存在的步骤
+  edp -release -rver v09001 --step pnr_innovus.route --append  # 追加新步骤到 v09001
+  edp -release -rver v09001 --step pnr_innovus.postroute --append --overwrite  # 覆盖已存在的步骤
   
   # Release 多个步骤
-  edp -release --release-version v09001 --step pnr_innovus.place --step pnr_innovus.postroute
+  edp -release -rver v09001 --step pnr_innovus.place --step pnr_innovus.postroute
   
   # Release 整个 flow（从 dependency.yaml 读取所有步骤）
-  edp -release --release-version v09001 --step pnr_innovus
+  edp -release -rver v09001 --step pnr_innovus
   
-  # 指定 block（如果不在 block 目录下）
-  edp -release --release-version v09001 --step pnr_innovus.postroute --release-block block1
+  # 指定 block（如果不在 block 目录下，使用别名）
+  edp -release -rver v09001 --step pnr_innovus.postroute -rblock block1
   
   # 覆盖已存在的步骤
-  edp -release --release-version v09001 --step pnr_innovus.postroute --overwrite
+  edp -release -rver v09001 --step pnr_innovus.postroute --overwrite
   
-  # 生成库配置文件（lib_config.tcl）
-  edp -lib --foundry Samsung --node ln08lpu_gp --lib-path /path/to/lib --lib-type STD --lib-output-dir /path/to/output
-  edp -lib --foundry Samsung --node ln08lpu_gp --lib-path /path/to/lib1 /path/to/lib2 --lib-type STD --lib-output-dir /path/to/output
-  edp -lib --foundry Samsung --node ln08lpu_gp --lib-path /path/to/lib --lib-type STD --lib-version 2.00A --lib-output-dir /path/to/output
-  edp -lib --foundry Samsung --node ln08lpu_gp --lib-path /path/to/lib --lib-type STD --lib-all-versions --lib-output-dir /path/to/output
+  # 生成库配置文件（lib_config.tcl，使用别名）
+  edp -lib --foundry Samsung --node ln08lpu_gp -lpath /path/to/lib --lib-type STD -odir /path/to/output
+  edp -lib --foundry Samsung --node ln08lpu_gp -lpath /path/to/lib1 /path/to/lib2 --lib-type STD -odir /path/to/output
+  edp -lib --foundry Samsung --node ln08lpu_gp -lpath /path/to/lib --lib-type STD --lib-version 2.00A -odir /path/to/output
+  edp -lib --foundry Samsung --node ln08lpu_gp -lpath /path/to/lib --lib-type STD --lib-all-versions -odir /path/to/output
   edp -lib --lib-gui  # 启动图形界面
   
-  # 使用完整命令（仍然支持）
-  edp init-workspace -prj dongting -v P85 \\
-    --block block1 --user zhangsan --branch branch1
-  
-  # 加载配置
-  edp load-config -prj dongting -v P85 --flow pv_calibre
-  
-  # 处理脚本
-  edp process-script --input script.tcl --output output.tcl
-  
-  # 加载工作流
-  edp load-workflow -prj dongting -v P85 --flow pv_calibre
-  
-  # 执行完整工作流
-  edp run -prj dongting -v P85 \\
-    --block block1 --user zhangsan --branch branch1 --flow pv_calibre
-
 注意：
   - 初始化相关命令请使用 edp_init
-  - 信息查询相关命令请使用 edp_info
-  - 教程查看可以使用 edp -tutor 或 edp_info -tutorial
+  - 所有功能已统一到 edp 命令，包括信息查询（-info, -history, -stats, -rollback, -validate）
         """
     )
     
@@ -476,6 +556,7 @@ def create_parser() -> argparse.ArgumentParser:
     _add_tutorial_args(parser)
     _add_lib_args(parser)
     _add_run_args(parser)
+    info_arg = _add_info_args(parser)  # 信息查询相关参数
     _add_common_args(parser)
     _add_legacy_command_args(parser)
     
@@ -609,77 +690,94 @@ def create_parser() -> argparse.ArgumentParser:
                 return [f for f in flows if f.startswith(prefix)]
         
         run_arg.completer = complete_run
+        
+        # 为 -info 参数添加补全（flow 列表）
+        def complete_info(prefix, parsed_args, **kwargs):
+            try:
+                project = getattr(parsed_args, 'project', None) if parsed_args else None
+                foundry = getattr(parsed_args, 'foundry', None) if parsed_args else None
+                node = getattr(parsed_args, 'node', None) if parsed_args else None
+                results = complete_flows(project=project, foundry=foundry, node=node)
+                if prefix:
+                    return [r for r in results if r.startswith(prefix)]
+                else:
+                    return results
+            except Exception:
+                return []
+        
+        if info_arg:
+            info_arg.completer = complete_info
+        
+        # 为 -history 参数添加补全（flow.step 格式）
+        def complete_history(prefix, parsed_args, **kwargs):
+            """补全 -history 参数（flow.step 格式）"""
+            if '.' in prefix:
+                flow, step_prefix = prefix.split('.', 1)
+                project = getattr(parsed_args, 'project', None) if parsed_args else None
+                foundry = getattr(parsed_args, 'foundry', None) if parsed_args else None
+                node = getattr(parsed_args, 'node', None) if parsed_args else None
+                steps = complete_flow_steps(
+                    flow=flow,
+                    project=project,
+                    foundry=foundry,
+                    node=node
+                )
+                return [f"{flow}.{s}" for s in steps if s.startswith(step_prefix)]
+            else:
+                project = getattr(parsed_args, 'project', None) if parsed_args else None
+                foundry = getattr(parsed_args, 'foundry', None) if parsed_args else None
+                node = getattr(parsed_args, 'node', None) if parsed_args else None
+                flows = complete_flows(project=project, foundry=foundry, node=node)
+                return [f for f in flows if f.startswith(prefix)]
+        
+        # 为 -stats 参数添加补全（flow.step 格式）
+        def complete_stats(prefix, parsed_args, **kwargs):
+            """补全 -stats 参数（flow.step 格式）"""
+            if '.' in prefix:
+                flow, step_prefix = prefix.split('.', 1)
+                project = getattr(parsed_args, 'project', None) if parsed_args else None
+                foundry = getattr(parsed_args, 'foundry', None) if parsed_args else None
+                node = getattr(parsed_args, 'node', None) if parsed_args else None
+                steps = complete_flow_steps(
+                    flow=flow,
+                    project=project,
+                    foundry=foundry,
+                    node=node
+                )
+                return [f"{flow}.{s}" for s in steps if s.startswith(step_prefix)]
+            else:
+                project = getattr(parsed_args, 'project', None) if parsed_args else None
+                foundry = getattr(parsed_args, 'foundry', None) if parsed_args else None
+                node = getattr(parsed_args, 'node', None) if parsed_args else None
+                flows = complete_flows(project=project, foundry=foundry, node=node)
+                return [f for f in flows if f.startswith(prefix)]
+        
+        # 为 -validate 参数添加补全（flow.step 格式）
+        def complete_validate(prefix, parsed_args, **kwargs):
+            """补全 -validate 参数（flow.step 格式）"""
+            if '.' in prefix:
+                flow, step_prefix = prefix.split('.', 1)
+                project = getattr(parsed_args, 'project', None) if parsed_args else None
+                foundry = getattr(parsed_args, 'foundry', None) if parsed_args else None
+                node = getattr(parsed_args, 'node', None) if parsed_args else None
+                steps = complete_flow_steps(
+                    flow=flow,
+                    project=project,
+                    foundry=foundry,
+                    node=node
+                )
+                return [f"{flow}.{s}" for s in steps if s.startswith(step_prefix)]
+            else:
+                project = getattr(parsed_args, 'project', None) if parsed_args else None
+                foundry = getattr(parsed_args, 'foundry', None) if parsed_args else None
+                node = getattr(parsed_args, 'node', None) if parsed_args else None
+                flows = complete_flows(project=project, foundry=foundry, node=node)
+                return [f for f in flows if f.startswith(prefix)]
     
     # 子命令（用于其他功能）
     # 注意：只有当没有使用 -branch、-run 时才需要子命令
+    # 已移除 load-workflow 命令，请使用 edp -info 查看流程信息
     subparsers = parser.add_subparsers(dest='command', help='可用命令', required=False)
-    
-    # ==================== init-workspace 命令 ====================
-    parser_init_workspace = subparsers.add_parser(
-        'init-workspace',
-        help='初始化用户工作空间（创建 branch）'
-    )
-    parser_init_workspace.add_argument('--work-path', help='WORK_PATH 根目录路径（默认：从当前目录自动推断）')
-    parser_init_workspace.add_argument('--project', '-prj', help='项目名称（如 dongting，默认：从当前目录自动推断）')
-    parser_init_workspace.add_argument('--version', '-v', help='项目版本名称（如 P85，默认：从当前目录自动推断）', dest='version')
-    parser_init_workspace.add_argument('--block', '-blk', help='块名称（如 block1，默认：从当前目录自动推断）')
-    parser_init_workspace.add_argument('--user', help='用户名（如 zhangsan，默认：从当前目录自动推断或使用当前系统用户）')
-    parser_init_workspace.add_argument('--branch', help='分支名称（如 branch1）')
-    parser_init_workspace.add_argument('--foundry', help='代工厂名称（可选）')
-    parser_init_workspace.add_argument('--node', help='工艺节点（可选）')
-    parser_init_workspace.add_argument('--from-branch-step', help='从指定分支的步骤创建新分支（如 "branch1:pnr_innovus.init"）')
-    
-    # ==================== load-config 命令 ====================
-    parser_load_config = subparsers.add_parser(
-        'load-config',
-        help='加载配置文件'
-    )
-    parser_load_config.add_argument('--project', '-prj', required=True, help='项目名称（如 dongting）')
-    parser_load_config.add_argument('--version', '-v', required=True, help='项目版本名称（如 P85）', dest='version')
-    parser_load_config.add_argument('--flow', required=True, help='流程名称（如 pv_calibre）')
-    parser_load_config.add_argument('--foundry', help='代工厂名称（可选）')
-    parser_load_config.add_argument('--node', help='工艺节点（可选）')
-    parser_load_config.add_argument('--output', help='输出配置文件路径（可选，默认输出到控制台）')
-    
-    # ==================== process-script 命令 ====================
-    parser_process_script = subparsers.add_parser(
-        'process-script',
-        help='处理 Tcl 脚本'
-    )
-    parser_process_script.add_argument('--input', required=True, help='输入的 Tcl 文件路径')
-    parser_process_script.add_argument('--output', help='输出文件路径（可选，默认输出到控制台）')
-    parser_process_script.add_argument('--search-paths', nargs='+', help='搜索路径列表（可选）')
-    parser_process_script.add_argument('--no-prepend-sources', action='store_true', help='不添加默认 source 语句')
-    
-    # ==================== load-workflow 命令 ====================
-    parser_load_workflow = subparsers.add_parser(
-        'load-workflow',
-        help='加载工作流定义'
-    )
-    parser_load_workflow.add_argument('--project', '-prj', required=True, help='项目名称（如 dongting）')
-    parser_load_workflow.add_argument('--version', '-v', required=True, help='项目版本名称（如 P85）', dest='version')
-    parser_load_workflow.add_argument('--flow', required=True, help='流程名称（如 pv_calibre）')
-    parser_load_workflow.add_argument('--foundry', help='代工厂名称（可选）')
-    parser_load_workflow.add_argument('--node', help='工艺节点（可选）')
-    parser_load_workflow.add_argument('--output', help='输出工作流信息（可选）')
-    
-    # ==================== run 命令 ====================
-    parser_run = subparsers.add_parser(
-        'run',
-        help='执行完整工作流'
-    )
-    parser_run.add_argument('--work-path', default='.', help='WORK_PATH 根目录路径（默认：当前目录）')
-    parser_run.add_argument('--project', '-prj', required=True, help='项目名称（如 dongting）')
-    parser_run.add_argument('--version', '-v', required=True, help='项目版本名称（如 P85）', dest='version')
-    parser_run.add_argument('--block', '-blk', required=True, help='块名称（如 block1）')
-    parser_run.add_argument('--user', required=True, help='用户名（如 zhangsan）')
-    parser_run.add_argument('--branch', required=True, help='分支名称（如 branch1）')
-    parser_run.add_argument('--flow', required=True, help='流程名称（如 pv_calibre）')
-    parser_run.add_argument('--foundry', help='代工厂名称（可选）')
-    parser_run.add_argument('--node', help='工艺节点（可选）')
-    parser_run.add_argument('--from-branch-step', help='从指定分支的步骤创建新分支（如 "branch1:pnr_innovus.init"）')
-    parser_run.add_argument('--no-prepend-sources', action='store_true', help='不添加默认 source 语句')
-    parser_run.add_argument('--dry-run', '-dry_run', action='store_true', help='演示模式：只显示构建的命令，不实际执行')
     
     return parser
 

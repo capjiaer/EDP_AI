@@ -76,68 +76,37 @@ results = manager.run_full_workflow(
 
 ## 命令行接口
 
-### 初始化用户工作空间
+### 创建分支
 
 ```bash
-edp-main init-workspace \
-  --work-path WORK_PATH \
-  --project dongting \
-  --project-node P85 \
-  --block block1 \
-  --user zhangsan \
-  --branch branch1
-```
+# 自动推断参数（推荐，在 user 目录下运行）
+edp -b branch1
 
-### 从已有分支创建新分支
+# 显式指定参数
+edp -b branch1 -prj dongting -v P85 --block block1 --user zhangsan
 
-```bash
-edp-main init-workspace \
-  --work-path WORK_PATH \
-  --project dongting \
-  --project-node P85 \
-  --block block1 \
-  --user zhangsan \
-  --branch branch2 \
-  --from-branch-step "branch1:pnr_innovus.init"
-```
-
-### 加载配置
-
-```bash
-edp-main load-config \
-  --project dongting \
-  --project-node P85 \
-  --flow pv_calibre
-```
-
-### 处理脚本
-
-```bash
-edp-main process-script \
-  --input script.tcl \
-  --output output.tcl
+# 从已有分支创建新分支
+edp -b branch2 --from-branch-step "branch1:pnr_innovus.init"
 ```
 
 ### 加载工作流
 
 ```bash
-edp-main load-workflow \
+# 已移除 load-workflow 命令，请使用 edp -info 查看流程信息
+# edp-main load-workflow \
   --project dongting \
   --project-node P85 \
   --flow pv_calibre
 ```
 
-### 执行完整工作流
+### 执行流程/步骤
 
 ```bash
-edp-main run \
-  --work-path WORK_PATH \
-  --project dongting \
-  --project-node P85 \
-  --block block1 \
-  --user zhangsan \
-  --branch branch1 \
-  --flow pv_calibre
+# 执行单个步骤（自动推断项目信息）
+edp -run pv_calibre.ipmerge
+
+# 执行多个步骤
+edp -run -fr pnr_innovus.place -to pv_calibre.drc
 ```
 
 ## 更多示例

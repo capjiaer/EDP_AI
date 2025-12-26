@@ -34,7 +34,7 @@ else
         prev="${COMP_WORDS[COMP_CWORD-1]}"
         
         # 基本命令和选项
-        opts="-h --help -init -b --branch -run --run -i --info --edp-center --work-path --project -prj --version -v --block -blk --user -u --foundry --node --from-branch-step init-workspace load-config process-script load-workflow run"
+        opts="-h --help -init -b --branch -run --run -i --info --edp-center --work-path --project -prj --version -v --block -blk --user -u --foundry --node --from-branch-step"
         
         # 如果当前词是选项，提供选项补全
         if [[ ${cur} == -* ]]; then

@@ -123,8 +123,14 @@ pip install PyQt5
 # 进入分支目录
 cd /path/to/work/{project}/{version}/{block}/{user}/{branch}
 
-# 运行单个步骤
+# 运行单个步骤（自动推断项目信息）
 edp -run pv_calibre.ipmerge
+
+# 运行单个步骤（显式指定项目信息）
+edp -run pv_calibre.ipmerge -prj dongting --foundry SAMSUNG --node S8
+
+# 运行单个步骤（指定完整路径信息）
+edp -run pv_calibre.ipmerge -prj dongting -v P85 --block block1 --user zhangsan --branch branch1
 
 # 演示模式（不实际执行）
 edp -run pv_calibre.ipmerge --dry-run

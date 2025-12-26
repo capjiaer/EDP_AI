@@ -15,7 +15,7 @@ from ..utils.param_inference import get_foundry_node
 @handle_cli_error(error_message="加载工作流失败")
 def handle_load_workflow(manager: WorkflowManager, args) -> int:
     """
-    处理 load-workflow 命令
+    处理 load-workflow 命令（已废弃，保留函数用于内部调用）
     
     Args:
         manager: WorkflowManager 实例
