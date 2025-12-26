@@ -1,0 +1,79 @@
+# Samsung LN08LPU_GP Node Configuration
+# 节点配置表 - 定义该节点的视图类型和文件模式
+
+# 节点元数据
+node_info:
+  name: "LN08LPU_GP"
+  description: "8nm Low Power Ultra General Purpose"
+  supported_lib_types:
+    - STD
+    - IP
+    - MEM
+
+# PVT Corner 映射规则
+pvt_corner_mapping:
+  ff: sigcmin    # fast-fast → best case
+  ss: sigcmax    # slow-slow → worst case
+  tt: typical    # typical → typical
+
+# 第一张表：定义每个库类型需要哪些视图类型
+standard_view_types:
+  STD:
+    - gds
+    - lef
+    - ccs_lvf
+    - ccs_power
+    - logic_synth
+    - cdl
+    - verilog
+  IP:
+    - gds
+    - lef
+    - liberty
+    - ibis
+    - model
+    - symbol
+  MEM:
+    - gds
+    - lef
+    - liberty
+    - verilog
+    - spice
+
+# 第二张表：定义每个视图类型对应的文件匹配模式
+view_file_patterns:
+  gds:
+    - "*.gds"
+  lef:
+    - "*.lef"
+  ccs_lvf:
+    - "*.db"                          # 标准 .db 文件
+    - "*.db_ccs_tn_lvf_dths"          # CCS LVF 格式的 .db 文件
+    - "*.lib_ccs_tn_lvf_dths.gz"      # 压缩的 CCS LVF .lib 文件
+    - "*.lib_ccs_tn_lvf_dths"         # 未压缩的 CCS LVF .lib 文件
+  ccs_power:
+    - "*.db"
+    - "*.lib.gz"
+    - "*.lib"
+  logic_synth:
+    - "*.db"
+    - "*.lib.gz"
+    - "*.lib"
+  cdl:
+    - "*.cdl"
+  verilog:
+    - "*.v"
+  liberty:
+    - "*.db"
+    - "*.lib.gz"
+    - "*.lib"
+  ibis:
+    - "*.ibs"
+  model:
+    - "*"  # 模型文件可能多种格式
+  symbol:
+    - "*"  # 符号文件可能多种格式
+  spice:
+    - "*.sp"
+    - "*.spice"
+

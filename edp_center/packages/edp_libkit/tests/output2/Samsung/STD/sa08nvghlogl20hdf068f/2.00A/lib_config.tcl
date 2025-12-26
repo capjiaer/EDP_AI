@@ -1,0 +1,9 @@
+# Library: sa08nvghlogl20hdf068f
+# Version: 2.00A
+# Generated at: 2025-12-16 17:52:29
+
+set LIBRARY(sa08nvghlogl20hdf068f,gds,gds) {C:/Users/anping.chen/Desktop/ALL_PRJ/EDP_AI/edp_center/packages/edp_libkit/tests/LIB_Example/STD_Cell/0711_install/v-logic_sa08nvghlogl20hdf068f/DesignWare_logic_libs/samsung08nvllg/20hs/hdf/hvt/2.00A/gds/sa08nvghlogl20hdf068f.gds C:/Users/anping.chen/Desktop/ALL_PRJ/EDP_AI/edp_center/packages/edp_libkit/tests/LIB_Example/STD_Cell/0711_install/v-logic_sa08nvghlogl20hdf068f/DesignWare_logic_libs/samsung08nvllg/20hs/hdf/hvt/2.00A/gds/sa08nvghlogl20hdf068f_SHIFT_15_1.gds}
+set LIBRARY(sa08nvghlogl20hdf068f,lef,lef) {C:/Users/anping.chen/Desktop/ALL_PRJ/EDP_AI/edp_center/packages/edp_libkit/tests/LIB_Example/STD_Cell/0711_install/v-logic_sa08nvghlogl20hdf068f/DesignWare_logic_libs/samsung08nvllg/20hs/hdf/hvt/2.00A/lef/sa08nvghlogl20hdf068f.lef}
+set LIBRARY(sa08nvghlogl20hdf068f,ccs_lvf,sigcmin,ffpg0p715vn40c,db) {C:/Users/anping.chen/Desktop/ALL_PRJ/EDP_AI/edp_center/packages/edp_libkit/tests/LIB_Example/STD_Cell/0711_install/v-logic_sa08nvghlogl20hdf068f/DesignWare_logic_libs/samsung08nvllg/20hs/hdf/hvt/2.00A/ccs_lvf/sa08nvghlogl20hdf068f_ffpg0p715vn40c.db}
+set LIBRARY(sa08nvghlogl20hdf068f,ccs_lvf,sigcmin,ffpg0p825v125c,db) {C:/Users/anping.chen/Desktop/ALL_PRJ/EDP_AI/edp_center/packages/edp_libkit/tests/LIB_Example/STD_Cell/0711_install/v-logic_sa08nvghlogl20hdf068f/DesignWare_logic_libs/samsung08nvllg/20hs/hdf/hvt/2.00A/ccs_lvf/sa08nvghlogl20hdf068f_ffpg0p825v125c.db}
+set LIBRARY(sa08nvghlogl20hdf068f,ccs_lvf,sigcmax,sspg0p585v125c,db) {C:/Users/anping.chen/Desktop/ALL_PRJ/EDP_AI/edp_center/packages/edp_libkit/tests/LIB_Example/STD_Cell/0711_install/v-logic_sa08nvghlogl20hdf068f/DesignWare_logic_libs/samsung08nvllg/20hs/hdf/hvt/2.00A/ccs_lvf/sa08nvghlogl20hdf068f_sspg0p585v125c.db}

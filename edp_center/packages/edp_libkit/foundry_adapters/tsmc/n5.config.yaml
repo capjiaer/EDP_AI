@@ -1,0 +1,56 @@
+# TSMC N5 Node Configuration
+# 节点配置表 - 定义该节点的视图类型和文件模式
+
+# 节点元数据
+node_info:
+  name: "N5"
+  description: "TSMC 5nm Process"
+  supported_lib_types:
+    - STD
+    - IP
+    - MEM
+
+# PVT Corner 映射规则
+pvt_corner_mapping:
+  ff: sigcmin    # fast-fast → best case
+  ss: sigcmax    # slow-slow → worst case
+  tt: typical    # typical → typical
+
+# 第一张表：定义每个库类型需要哪些视图类型
+standard_view_types:
+  STD:
+    - gds
+    - lef
+    - liberty
+    - cdl
+    - verilog
+  IP:
+    - gds
+    - lef
+    - liberty
+    - verilog
+  MEM:
+    - gds
+    - lef
+    - liberty
+    - verilog
+    - spice
+
+# 第二张表：定义每个视图类型对应的文件匹配模式
+view_file_patterns:
+  gds:
+    - "*.gds"
+  lef:
+    - "*.lef"
+  liberty:
+    - "*.db"      # TSMC liberty 文件通常是 .db 格式
+    - "*.lib.gz"  # 压缩的 .lib 文件
+    - "*.lib"     # 未压缩的 .lib 文件
+  cdl:
+    - "*.cdl"
+  verilog:
+    - "*.v"
+  spice:
+    - "*.sp"
+    - "*.spice"
+

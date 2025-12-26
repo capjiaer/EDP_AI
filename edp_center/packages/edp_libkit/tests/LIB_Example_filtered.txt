@@ -1,0 +1,60 @@
+# 目录结构（已过滤）
+# 根目录: edp_center\packages\edp_libkit\tests\LIB_Example
+# 过滤类型: pr
+# 共找到 33 个目录, 13 个文件
+# 已排除 0 个目录, 1 个文件
+
+## 目录列表（已保留）
+edp_center\packages\edp_libkit\tests\LIB_Example\IP
+edp_center\packages\edp_libkit\tests\LIB_Example\IP\ln08lpu_gpio_1p8v
+edp_center\packages\edp_libkit\tests\LIB_Example\IP\ln08lpu_gpio_1p8v\v1.12
+edp_center\packages\edp_libkit\tests\LIB_Example\IP\ln08lpu_gpio_1p8v\v1.12\BE-Common
+edp_center\packages\edp_libkit\tests\LIB_Example\IP\ln08lpu_gpio_1p8v\v1.12\BE-Common\GDS
+edp_center\packages\edp_libkit\tests\LIB_Example\IP\ln08lpu_gpio_1p8v\v1.12\BE-Common\LEF
+edp_center\packages\edp_libkit\tests\LIB_Example\IP\ln08lpu_gpio_1p8v\v1.12\FE-Common
+edp_center\packages\edp_libkit\tests\LIB_Example\IP\ln08lpu_gpio_1p8v\v1.12\FE-Common\IBIS
+edp_center\packages\edp_libkit\tests\LIB_Example\IP\ln08lpu_gpio_1p8v\v1.12\FE-Common\LEF
+edp_center\packages\edp_libkit\tests\LIB_Example\IP\ln08lpu_gpio_1p8v\v1.12\FE-Common\LIBERTY
+edp_center\packages\edp_libkit\tests\LIB_Example\STD_Cell
+edp_center\packages\edp_libkit\tests\LIB_Example\STD_Cell\0711_install
+edp_center\packages\edp_libkit\tests\LIB_Example\STD_Cell\0711_install\v-logic_sa08nvghlogl20hdf068f
+edp_center\packages\edp_libkit\tests\LIB_Example\STD_Cell\0711_install\v-logic_sa08nvghlogl20hdf068f\DesignWare_logic_libs
+edp_center\packages\edp_libkit\tests\LIB_Example\STD_Cell\0711_install\v-logic_sa08nvghlogl20hdf068f\DesignWare_logic_libs\samsung08nvllg
+edp_center\packages\edp_libkit\tests\LIB_Example\STD_Cell\0711_install\v-logic_sa08nvghlogl20hdf068f\DesignWare_logic_libs\samsung08nvllg\20hs
+edp_center\packages\edp_libkit\tests\LIB_Example\STD_Cell\0711_install\v-logic_sa08nvghlogl20hdf068f\DesignWare_logic_libs\samsung08nvllg\20hs\hdf
+edp_center\packages\edp_libkit\tests\LIB_Example\STD_Cell\0711_install\v-logic_sa08nvghlogl20hdf068f\DesignWare_logic_libs\samsung08nvllg\20hs\hdf\hvt
+edp_center\packages\edp_libkit\tests\LIB_Example\STD_Cell\0711_install\v-logic_sa08nvghlogl20hdf068f\DesignWare_logic_libs\samsung08nvllg\20hs\hdf\hvt\2.00A
+edp_center\packages\edp_libkit\tests\LIB_Example\STD_Cell\0711_install\v-logic_sa08nvghlogl20hdf068f\DesignWare_logic_libs\samsung08nvllg\20hs\hdf\hvt\2.00A\ccs_lvf
+edp_center\packages\edp_libkit\tests\LIB_Example\STD_Cell\0711_install\v-logic_sa08nvghlogl20hdf068f\DesignWare_logic_libs\samsung08nvllg\20hs\hdf\hvt\2.00A\cdl
+edp_center\packages\edp_libkit\tests\LIB_Example\STD_Cell\0711_install\v-logic_sa08nvghlogl20hdf068f\DesignWare_logic_libs\samsung08nvllg\20hs\hdf\hvt\2.00A\gds
+edp_center\packages\edp_libkit\tests\LIB_Example\STD_Cell\0711_install\v-logic_sa08nvghlogl20hdf068f\DesignWare_logic_libs\samsung08nvllg\20hs\hdf\hvt\2.00A\lef
+edp_center\packages\edp_libkit\tests\LIB_Example\STD_Cell\0711_install\v-logic_sa08nvghlogl22hsf068f
+edp_center\packages\edp_libkit\tests\LIB_Example\STD_Cell\0711_install\v-logic_sa08nvghlogl22hsf068f\DesignWare_logic_libs
+edp_center\packages\edp_libkit\tests\LIB_Example\STD_Cell\0711_install\v-logic_sa08nvghlogl22hsf068f\DesignWare_logic_libs\samsung08nvllg
+edp_center\packages\edp_libkit\tests\LIB_Example\STD_Cell\0711_install\v-logic_sa08nvghlogl22hsf068f\DesignWare_logic_libs\samsung08nvllg\22hs
+edp_center\packages\edp_libkit\tests\LIB_Example\STD_Cell\0711_install\v-logic_sa08nvghlogl22hsf068f\DesignWare_logic_libs\samsung08nvllg\22hs\hsf
+edp_center\packages\edp_libkit\tests\LIB_Example\STD_Cell\0711_install\v-logic_sa08nvghlogl22hsf068f\DesignWare_logic_libs\samsung08nvllg\22hs\hsf\hvt
+edp_center\packages\edp_libkit\tests\LIB_Example\STD_Cell\0711_install\v-logic_sa08nvghlogl22hsf068f\DesignWare_logic_libs\samsung08nvllg\22hs\hsf\hvt\1.01a
+edp_center\packages\edp_libkit\tests\LIB_Example\STD_Cell\0711_install\v-logic_sa08nvghlogl22hsf068f\DesignWare_logic_libs\samsung08nvllg\22hs\hsf\hvt\1.01a\ccs_lvf
+edp_center\packages\edp_libkit\tests\LIB_Example\STD_Cell\0711_install\v-logic_sa08nvghlogl22hsf068f\DesignWare_logic_libs\samsung08nvllg\22hs\hsf\hvt\1.01a\gds
+edp_center\packages\edp_libkit\tests\LIB_Example\STD_Cell\0711_install\v-logic_sa08nvghlogl22hsf068f\DesignWare_logic_libs\samsung08nvllg\22hs\hsf\hvt\1.01a\lef
+
+## 文件列表（已保留）
+edp_center\packages\edp_libkit\tests\LIB_Example\IP\ln08lpu_gpio_1p8v\v1.12\BE-Common\GDS\ln08lpu_gpio_1p8v.gds
+edp_center\packages\edp_libkit\tests\LIB_Example\IP\ln08lpu_gpio_1p8v\v1.12\BE-Common\LEF\ln08lpu_gpio_1p8v.lef
+edp_center\packages\edp_libkit\tests\LIB_Example\IP\ln08lpu_gpio_1p8v\v1.12\FE-Common\LEF\ln08lpu_gpio_1p8v.lef
+edp_center\packages\edp_libkit\tests\LIB_Example\IP\ln08lpu_gpio_1p8v\v1.12\FE-Common\LIBERTY\ln08lpu_gpio_1p8v_ffpg0p715vn40c.db
+edp_center\packages\edp_libkit\tests\LIB_Example\STD_Cell\0711_install\v-logic_sa08nvghlogl20hdf068f\DesignWare_logic_libs\samsung08nvllg\20hs\hdf\hvt\2.00A\ccs_lvf\sa08nvghlogl20hdf068f_ffpg0p715vn40c.db
+edp_center\packages\edp_libkit\tests\LIB_Example\STD_Cell\0711_install\v-logic_sa08nvghlogl20hdf068f\DesignWare_logic_libs\samsung08nvllg\20hs\hdf\hvt\2.00A\ccs_lvf\sa08nvghlogl20hdf068f_ffpg0p825v125c.db
+edp_center\packages\edp_libkit\tests\LIB_Example\STD_Cell\0711_install\v-logic_sa08nvghlogl20hdf068f\DesignWare_logic_libs\samsung08nvllg\20hs\hdf\hvt\2.00A\ccs_lvf\sa08nvghlogl20hdf068f_sspg0p585v125c.db
+edp_center\packages\edp_libkit\tests\LIB_Example\STD_Cell\0711_install\v-logic_sa08nvghlogl20hdf068f\DesignWare_logic_libs\samsung08nvllg\20hs\hdf\hvt\2.00A\gds\sa08nvghlogl20hdf068f.gds
+edp_center\packages\edp_libkit\tests\LIB_Example\STD_Cell\0711_install\v-logic_sa08nvghlogl20hdf068f\DesignWare_logic_libs\samsung08nvllg\20hs\hdf\hvt\2.00A\gds\sa08nvghlogl20hdf068f_SHIFT_15_1.gds
+edp_center\packages\edp_libkit\tests\LIB_Example\STD_Cell\0711_install\v-logic_sa08nvghlogl20hdf068f\DesignWare_logic_libs\samsung08nvllg\20hs\hdf\hvt\2.00A\lef\sa08nvghlogl20hdf068f.lef
+edp_center\packages\edp_libkit\tests\LIB_Example\STD_Cell\0711_install\v-logic_sa08nvghlogl22hsf068f\DesignWare_logic_libs\samsung08nvllg\22hs\hsf\hvt\1.01a\ccs_lvf\sa08nvghlogl22hsf068f_ffpg0p715vn40c.db
+edp_center\packages\edp_libkit\tests\LIB_Example\STD_Cell\0711_install\v-logic_sa08nvghlogl22hsf068f\DesignWare_logic_libs\samsung08nvllg\22hs\hsf\hvt\1.01a\gds\sa08nvghlogl22hsf068f.gds
+edp_center\packages\edp_libkit\tests\LIB_Example\STD_Cell\0711_install\v-logic_sa08nvghlogl22hsf068f\DesignWare_logic_libs\samsung08nvllg\22hs\hsf\hvt\1.01a\lef\sa08nvghlogl22hsf068f.lef
+
+
+## 已排除的文件（供参考）
+# 共排除 1 个文件
+# edp_center\packages\edp_libkit\tests\LIB_Example\README.md

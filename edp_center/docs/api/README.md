@@ -8,7 +8,7 @@
 
 1. **[WorkflowManager API](workflow_manager.md)**
    - 统一工作流管理接口
-   - 整合四个 KIT 的接口
+   - 整合五个 KIT 的接口
 
 2. **[edp_dirkit API](edp_dirkit.md)**
    - 目录管理和工作空间初始化
@@ -26,7 +26,12 @@
    - 工作流执行和依赖管理
    - Graph, Step, ICCommandExecutor
 
-6. **[edp_common API](edp_common.md)**
+6. **[edp_libkit API](../../packages/edp_libkit/README.md)**
+   - 库配置生成工具
+   - LibConfigGenerator, FoundryAdapter
+   - 支持多种 foundry 和库类型
+
+7. **[edp_common API](edp_common.md)**
    - 公共模块（异常、日志、错误处理）
 
 ---

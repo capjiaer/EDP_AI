@@ -216,6 +216,56 @@ def _add_tutorial_args(parser: argparse.ArgumentParser) -> None:
     )
 
 
+def _add_lib_args(parser: argparse.ArgumentParser) -> None:
+    """添加 -lib 相关参数"""
+    parser.add_argument(
+        '-lib', '--lib',
+        action='store_true',
+        help='生成库配置文件（lib_config.tcl）'
+    )
+    parser.add_argument(
+        '--lib-path',
+        type=str,
+        nargs='+',
+        help='库目录路径（可以指定多个，或使用 --lib-paths-file）'
+    )
+    parser.add_argument(
+        '--lib-paths-file',
+        type=str,
+        help='包含库路径列表的文件（每行一个路径，可选）'
+    )
+    parser.add_argument(
+        '--lib-type',
+        choices=['STD', 'IP', 'MEM'],
+        help='库类型（STD: 标准单元库, IP: IP库, MEM: 内存库，必须指定）'
+    )
+    parser.add_argument(
+        '--lib-version',
+        type=str,
+        help='指定版本号（如 2.00A, 1.00B）。如果未指定，默认使用最新版本'
+    )
+    parser.add_argument(
+        '--lib-all-versions',
+        action='store_true',
+        help='处理所有版本：最新版本生成 lib_config.tcl，其他版本生成 lib_config.{version}.tcl。与 --lib-version 互斥'
+    )
+    parser.add_argument(
+        '--lib-output-dir',
+        type=str,
+        help='lib_config.tcl输出目录（必须指定）'
+    )
+    parser.add_argument(
+        '--lib-array-name',
+        type=str,
+        help='lib_config.tcl中的数组变量名（默认：LIBRARY）'
+    )
+    parser.add_argument(
+        '--lib-gui',
+        action='store_true',
+        help='启动库配置生成图形界面'
+    )
+
+
 def _add_run_args(parser: argparse.ArgumentParser) -> None:
     """添加 -run 相关参数"""
     parser.add_argument(
@@ -384,6 +434,13 @@ def create_parser() -> argparse.ArgumentParser:
   # 覆盖已存在的步骤
   edp -release --release-version v09001 --step pnr_innovus.postroute --overwrite
   
+  # 生成库配置文件（lib_config.tcl）
+  edp -lib --foundry Samsung --node ln08lpu_gp --lib-path /path/to/lib --lib-type STD --lib-output-dir /path/to/output
+  edp -lib --foundry Samsung --node ln08lpu_gp --lib-path /path/to/lib1 /path/to/lib2 --lib-type STD --lib-output-dir /path/to/output
+  edp -lib --foundry Samsung --node ln08lpu_gp --lib-path /path/to/lib --lib-type STD --lib-version 2.00A --lib-output-dir /path/to/output
+  edp -lib --foundry Samsung --node ln08lpu_gp --lib-path /path/to/lib --lib-type STD --lib-all-versions --lib-output-dir /path/to/output
+  edp -lib --lib-gui  # 启动图形界面
+  
   # 使用完整命令（仍然支持）
   edp init-workspace -prj dongting -v P85 \\
     --block block1 --user zhangsan --branch branch1
@@ -417,6 +474,7 @@ def create_parser() -> argparse.ArgumentParser:
     _add_gui_args(parser)
     _add_graph_args(parser)
     _add_tutorial_args(parser)
+    _add_lib_args(parser)
     _add_run_args(parser)
     _add_common_args(parser)
     _add_legacy_command_args(parser)

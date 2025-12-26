@@ -1,6 +1,6 @@
 # EDP Main - 统一的工作流管理工具
 
-EDP Main 整合了四个核心 KIT，提供统一的工作流管理接口。
+EDP Main 整合了五个核心 KIT，提供统一的工作流管理接口。
 
 ## 📚 文档
 
@@ -59,6 +59,7 @@ results = manager.run_full_workflow(
 - **配置加载**：使用 `edp_configkit` 加载和合并配置
 - **脚本处理**：使用 `edp_cmdkit` 处理 Tcl 脚本（展开 #import 指令）
 - **工作流执行**：使用 `edp_flowkit` 执行工作流
+- **库配置生成**：使用 `edp_libkit` 生成库配置文件（lib_config.tcl）
 - **跨 flow 依赖自动发现**：通过文件匹配自动建立依赖关系
 
 ## 跨 flow 依赖自动发现

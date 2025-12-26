@@ -48,6 +48,7 @@ docs/
 │   ├── edp_configkit.md
 │   ├── edp_dirkit.md
 │   ├── edp_flowkit.md
+│   ├── edp_libkit.md (在 packages/edp_libkit/README.md)
 │   ├── edp_common.md
 │   └── workflow_manager.md
 ├── architecture/           # 架构文档
@@ -135,6 +136,7 @@ docs/
 - **edp_configkit**：配置管理相关文档
 - **edp_cmdkit**：脚本处理相关文档
 - **edp_flowkit**：工作流执行相关文档
+- **edp_libkit**：库配置生成相关文档
 
 ---
 

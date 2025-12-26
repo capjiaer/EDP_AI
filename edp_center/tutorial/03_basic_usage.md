@@ -317,7 +317,74 @@ edp -release --release-version v09001 --step pnr_innovus.postroute --strict
 - 发布后的数据会被设置为只读，防止意外修改
 - 详细用法请参考 [RELEASE 功能](10_release.md)
 
-### 7. 查看教程 (`edp -tutor` 或 `edp_info -tutorial`)
+### 7. 生成库配置文件 (`edp -lib`)
+
+生成库配置文件（lib_config.tcl）：
+
+```bash
+# 基本用法：处理单个STD库
+edp -lib --foundry Samsung --node ln08lpu_gp \
+  --lib-path /path/to/std_library_dir \
+  --lib-type STD \
+  --lib-output-dir /path/to/output
+
+# 批量处理多个库
+edp -lib --foundry Samsung --node ln08lpu_gp \
+  --lib-path /path/to/lib1 /path/to/lib2 /path/to/lib3 \
+  --lib-type STD \
+  --lib-output-dir /path/to/output
+
+# 从文件读取库路径列表
+edp -lib --foundry Samsung --node ln08lpu_gp \
+  --lib-paths-file lib_paths.txt \
+  --lib-type STD \
+  --lib-output-dir /path/to/output
+
+# 指定特定版本
+edp -lib --foundry Samsung --node ln08lpu_gp \
+  --lib-path /path/to/library_dir \
+  --lib-type STD \
+  --lib-version 2.00A \
+  --lib-output-dir /path/to/output
+
+# 处理所有版本（最新版本生成 lib_config.tcl，其他版本生成 lib_config.{version}.tcl）
+edp -lib --foundry Samsung --node ln08lpu_gp \
+  --lib-path /path/to/library_dir \
+  --lib-type STD \
+  --lib-all-versions \
+  --lib-output-dir /path/to/output
+
+# 处理IP库
+edp -lib --foundry Samsung --node ln08lpu_gp \
+  --lib-path /path/to/ip_library_dir \
+  --lib-type IP \
+  --lib-output-dir /path/to/output
+
+# 启动图形界面
+edp -lib --lib-gui
+```
+
+**说明**：
+- `--lib-type`: 库类型，必须指定（STD: 标准单元库, IP: IP库, MEM: 内存库）
+- `--foundry`: Foundry名称（如 Samsung, SMIC, TSMC）
+- `--node`: 工艺节点（如 ln08lpu_gp）
+- `--lib-path`: 库目录路径（可指定多个，或使用 `--lib-paths-file`）
+- `--lib-output-dir`: 输出目录（必须指定）
+- `--lib-version`: 指定版本号（可选，默认使用最新版本）
+- `--lib-all-versions`: 处理所有版本（与 `--lib-version` 互斥）
+- `--lib-gui`: 启动图形界面（推荐新手使用）
+
+**输出结构**：
+```
+{output_dir}/{lib_name}/
+├── lib_config.tcl         # 最新版本（默认）
+├── lib_config.1.01a.tcl   # 其他版本（如果使用 --lib-all-versions）
+└── lib_config.1.00B.tcl
+```
+
+**详细用法**：请参考 `edp_center/packages/edp_libkit/README.md`
+
+### 8. 查看教程 (`edp -tutor` 或 `edp_info -tutorial`)
 
 查看 HTML 教程（普通用户）：
 

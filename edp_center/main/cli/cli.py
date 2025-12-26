@@ -206,13 +206,29 @@ def main():
         graph_args = GraphArgs(args)
         return handle_graph_cmd(manager, graph_args)
     
+    # 处理 -lib 命令
+    if args.lib:
+        try:
+            from .commands.lib_handler import handle_lib_cmd
+            return handle_lib_cmd(args)
+        except ImportError as e:
+            print(f"[ERROR] 导入 Lib 模块失败: {e}", file=sys.stderr)
+            import traceback
+            traceback.print_exc()
+            return 1
+        except Exception as e:
+            print(f"[ERROR] 执行 Lib 命令失败: {e}", file=sys.stderr)
+            import traceback
+            traceback.print_exc()
+            return 1
+    
     # 处理子命令
     result = route_subcommands(args)
     if result is not None:
         return result
     
     # 如果没有提供命令，显示帮助
-    if not args.branch and not args.run and not args.command and not args.graph and not args.workflow_web:
+    if not args.branch and not args.run and not args.command and not args.graph and not args.workflow_web and not args.lib:
         parser.print_help()
         return 1
     
