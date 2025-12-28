@@ -1,0 +1,9 @@
+project:
+  allowed_work_paths:
+  - Example/WORK_PATH
+  - C:/Users/capjiaer/AppData/Local/Temp/edp_test_skc_vvm4
+  - /c/Users/capjiaer/Desktop/cursor/EDP_AI/Example/WORK_PATH
+  blocks:
+    block1: test_user
+  name: prj_example
+  version: P85
