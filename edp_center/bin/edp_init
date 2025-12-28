@@ -13,27 +13,67 @@ SRC_FILE="${SCRIPT_DIR}/edp_init.py"
 # Users can set EDP_PYTHON_PATH environment variable to use specific Python interpreter
 # Example: export EDP_PYTHON_PATH=/usrhome/chenanping/tools/python3.9.16/bin/python3.9
 
-if [ -n "$EDP_PYTHON_PATH" ]; then
-    # Use user-specified Python path
-    PYTHON_PATH="$EDP_PYTHON_PATH"
-elif command -v python3 >/dev/null 2>&1; then
-    # Try python3 first
-    PYTHON_PATH=$(command -v python3)
-elif command -v python >/dev/null 2>&1; then
-    # Fall back to python
-    PYTHON_PATH=$(command -v python)
-elif [ -f /usr/bin/python3 ]; then
-    PYTHON_PATH=/usr/bin/python3
-elif [ -f /usr/local/bin/python3 ]; then
-    PYTHON_PATH=/usr/local/bin/python3
-elif [ -f /usr/bin/python ]; then
-    PYTHON_PATH=/usr/bin/python
-elif [ -f /usr/local/bin/python ]; then
-    PYTHON_PATH=/usr/local/bin/python
-else
-    # Last resort: try python3, then python
-    PYTHON_PATH=python3 || PYTHON_PATH=python
-fi
+# Function to detect Python path (Windows Git Bash compatible)
+_detect_python() {
+    # Method 1: Use EDP_PYTHON_PATH if set
+    if [ -n "$EDP_PYTHON_PATH" ]; then
+        echo "$EDP_PYTHON_PATH"
+        return 0
+    fi
+    
+    # Method 2: From PATH, find actual Python installation (Windows)
+    PYTHON_FROM_PATH=$(echo "$PATH" | tr ':' '\n' | grep -i "Programs/Python/Python" | head -1)
+    if [ -n "$PYTHON_FROM_PATH" ] && [ -f "$PYTHON_FROM_PATH/python.exe" ]; then
+        echo "$PYTHON_FROM_PATH/python.exe"
+        return 0
+    fi
+    
+    # Method 3: Use $HOME to find Python installation (Windows)
+    if [ -n "$HOME" ]; then
+        USER_HOME=$(echo "$HOME" | sed 's|^/c/|/c/|')
+        if [ -d "$USER_HOME/AppData/Local/Programs/Python" ]; then
+            PYTHON_DIR=$(ls -td "$USER_HOME/AppData/Local/Programs/Python/Python"* 2>/dev/null | head -1)
+            if [ -n "$PYTHON_DIR" ] && [ -f "$PYTHON_DIR/python.exe" ]; then
+                echo "$PYTHON_DIR/python.exe"
+                return 0
+            fi
+        fi
+    fi
+    
+    # Method 4: Try command -v (but exclude WindowsApps launcher)
+    if command -v python3 >/dev/null 2>&1; then
+        PYTHON3_PATH=$(command -v python3)
+        if [[ "$PYTHON3_PATH" != *"WindowsApps"* ]]; then
+            if "$PYTHON3_PATH" --version >/dev/null 2>&1; then
+                echo "$PYTHON3_PATH"
+                return 0
+            fi
+        fi
+    fi
+    
+    if command -v python >/dev/null 2>&1; then
+        PYTHON_PATH=$(command -v python)
+        if [[ "$PYTHON_PATH" != *"WindowsApps"* ]]; then
+            if "$PYTHON_PATH" --version >/dev/null 2>&1; then
+                echo "$PYTHON_PATH"
+                return 0
+            fi
+        fi
+    fi
+    
+    # Method 5: Try common Unix paths
+    for py_path in /usr/bin/python3 /usr/local/bin/python3 /usr/bin/python /usr/local/bin/python; do
+        if [ -f "$py_path" ]; then
+            echo "$py_path"
+            return 0
+        fi
+    done
+    
+    # Last resort
+    echo "python3"
+}
+
+PYTHON_PATH=$(_detect_python)
 
 # Execute the Python script
 exec "$PYTHON_PATH" "$SRC_FILE" "$@"

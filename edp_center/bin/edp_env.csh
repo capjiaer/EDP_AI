@@ -98,7 +98,56 @@ endif
 setenv EDP_CENTER_PATH "$edp_center_dir"
 setenv EDP_BIN_PATH "$edp_bin_dir"
 
-# 4. 刷新 csh/tcsh 的命令 hash 表（重要！）
+# 4. 自动检测并设置 Python 路径（Windows Git Bash 兼容）
+# 如果用户没有手动设置 EDP_PYTHON_PATH，则自动检测
+if ( ! $?EDP_PYTHON_PATH ) then
+    # 方法1: 从 PATH 中查找 Python 安装路径（Windows）
+    set python_from_path = ""
+    foreach path_item ( `echo "$path" | tr ' ' '\n'` )
+        if ( `echo "$path_item" | grep -c "Programs/Python/Python"` > 0 ) then
+            if ( -f "$path_item/python.exe" ) then
+                set python_from_path = "$path_item/python.exe"
+                break
+            endif
+        endif
+    end
+    
+    if ( "$python_from_path" != "" ) then
+        setenv EDP_PYTHON_PATH "$python_from_path"
+    else
+        # 方法2: 使用 $HOME 查找 Python 安装路径（Windows）
+        if ( $?HOME ) then
+            set user_home = "$HOME"
+            if ( -d "$user_home/AppData/Local/Programs/Python" ) then
+                set python_dir = `ls -td "$user_home/AppData/Local/Programs/Python/Python"* 2>/dev/null | head -1`
+                if ( "$python_dir" != "" && -f "$python_dir/python.exe" ) then
+                    setenv EDP_PYTHON_PATH "$python_dir/python.exe"
+                endif
+            endif
+        endif
+        
+        # 方法3: 尝试使用 which（但排除 WindowsApps 启动器）
+        if ( ! $?EDP_PYTHON_PATH ) then
+            if ( `which python3 >& /dev/null` ) then
+                set python3_path = `which python3`
+                if ( `echo "$python3_path" | grep -c "WindowsApps"` == 0 ) then
+                    if ( `"$python3_path" --version >& /dev/null` ) then
+                        setenv EDP_PYTHON_PATH "$python3_path"
+                    endif
+                endif
+            else if ( `which python >& /dev/null` ) then
+                set python_path = `which python`
+                if ( `echo "$python_path" | grep -c "WindowsApps"` == 0 ) then
+                    if ( `"$python_path" --version >& /dev/null` ) then
+                        setenv EDP_PYTHON_PATH "$python_path"
+                    endif
+                endif
+            endif
+        endif
+    endif
+endif
+
+# 5. 刷新 csh/tcsh 的命令 hash 表（重要！）
 # 在 csh/tcsh 中，修改 PATH 后需要 rehash 才能找到新命令
 rehash
 
