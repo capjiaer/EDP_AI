@@ -148,13 +148,12 @@ class ProjectFinder:
                 if node and node_dir.name != node:
                     continue
                 
-                # 跳过 common 目录
-                if node_dir.name == 'common':
-                    continue
-                
-                # 查找项目目录（排除 common）
+                # 查找项目目录（排除 common 项目）
                 for item in node_dir.iterdir():
                     if item.is_dir() and not item.name.startswith('.'):
+                        # 跳过 common 项目（common 是特殊项目，不应该出现在项目列表中）
+                        if item.name == 'common':
+                            continue
                         projects.append({
                             'foundry': foundry_dir.name,
                             'node': node_dir.name,

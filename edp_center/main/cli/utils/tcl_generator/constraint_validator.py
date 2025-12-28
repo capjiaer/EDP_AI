@@ -67,24 +67,78 @@ def validate_full_tcl_constraints(full_tcl_path: Path, config_files: list, edp_c
             # 解析错误信息
             # 格式：ERROR: Value '64' of variable 'pv_calibre(ipmerge,cpu_num)' is not in constraint list. Allowed values are: 1 2 4 8 16 32
             
-            # 构建友好的错误信息
-            friendly_error = (
-                f"❌ 配置验证失败\n"
-                f"  {error_msg}\n"
-                f"  配置文件: {', '.join(str(f) for f in config_files)}\n"
-            )
+            # 尝试提取变量名和允许值
+            variable_name = None
+            current_value = None
+            allowed_values = None
             
-            # 提取变量名和允许值（如果可能）
-            suggestion = "💡 建议: 请检查配置文件，将变量值改为允许的值"
+            # 解析错误消息
+            if "variable '" in error_msg and "' is not in constraint list" in error_msg:
+                # 提取变量名
+                start = error_msg.find("variable '") + len("variable '")
+                end = error_msg.find("' is not in constraint list")
+                if start > len("variable '") - 1 and end > start:
+                    variable_name = error_msg[start:end]
+            
+            if "Value '" in error_msg:
+                # 提取当前值
+                start = error_msg.find("Value '") + len("Value '")
+                end = error_msg.find("' of variable")
+                if start > len("Value '") - 1 and end > start:
+                    current_value = error_msg[start:end]
+            
+            if "Allowed values are:" in error_msg:
+                # 提取允许值
+                start = error_msg.find("Allowed values are:") + len("Allowed values are:")
+                allowed_values_str = error_msg[start:].strip()
+                allowed_values = allowed_values_str.split()
+            
+            # 构建友好的错误信息
+            friendly_error = f"配置验证失败：变量值不在允许的约束列表中"
+            
+            # 构建详细的解决建议
+            suggestion_parts = [
+                "请检查配置文件，将变量值改为允许的值：",
+                ""
+            ]
+            
+            if variable_name:
+                suggestion_parts.append(f"变量名: {variable_name}")
+            if current_value:
+                suggestion_parts.append(f"当前值: {current_value}")
+            if allowed_values:
+                suggestion_parts.append(f"允许的值: {', '.join(allowed_values)}")
+                suggestion_parts.append("")
+                suggestion_parts.append("修改示例：")
+                if variable_name and current_value:
+                    # 尝试解析变量名（格式：flow_name(step_name,var_name)）
+                    if '(' in variable_name and ')' in variable_name:
+                        var_parts = variable_name.split('(')
+                        flow_step = var_parts[0]
+                        var_name = var_parts[1].rstrip(')')
+                        suggestion_parts.append(f"  在配置文件中找到 {flow_step} -> {var_name}，将值改为允许的值之一")
+            
+            suggestion_parts.append("")
+            suggestion_parts.append("相关配置文件：")
+            for config_file in config_files[:5]:  # 最多显示5个文件
+                suggestion_parts.append(f"  - {config_file}")
+            if len(config_files) > 5:
+                suggestion_parts.append(f"  ... 还有 {len(config_files) - 5} 个配置文件")
             
             raise ValidationError(
                 friendly_error,
+                field_name=variable_name or "配置变量",
+                field_value=current_value,
+                expected=f"允许的值: {', '.join(allowed_values) if allowed_values else '未知'}",
                 context={
                     "error": error_msg,
+                    "variable_name": variable_name,
+                    "current_value": current_value,
+                    "allowed_values": allowed_values,
                     "config_files": [str(f) for f in config_files],
                     "full_tcl_path": str(full_tcl_path)
                 },
-                suggestion=suggestion
+                suggestion="\n".join(suggestion_parts)
             )
         else:
             # 其他 Tcl 错误，可能是 full.tcl 本身的语法错误

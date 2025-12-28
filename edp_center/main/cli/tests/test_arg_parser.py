@@ -13,7 +13,7 @@ import argparse
 # 添加父目录到 Python 路径
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..')))
 
-from edp_center.main.cli.arg_parser import create_parser
+from edp_center.main.cli.arg_parser.main import create_parser
 
 
 class TestArgParser(unittest.TestCase):

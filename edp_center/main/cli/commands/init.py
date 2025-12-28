@@ -54,6 +54,7 @@ def handle_init_project(manager: WorkflowManager, args) -> int:
             return 1
     
     # 1. 如果参数缺失，尝试从 .edp_version 文件推断
+    try:
         version = getattr(args, 'version', None)
         if not args.project or not version:
             infer_params_from_version_file(args, manager)
@@ -223,6 +224,11 @@ def handle_init_project(manager: WorkflowManager, args) -> int:
                 print(f"\n[INFO] 所有指定的 user 目录都已存在，无需重复初始化", file=sys.stderr)
             else:
                 print(f"\n[OK] 项目结构已存在，无需重复初始化", file=sys.stderr)
+    except Exception as e:
+        print(f"[ERROR] 初始化失败: {e}", file=sys.stderr)
+        import traceback
+        traceback.print_exc()
+        return 1
     
     return 0
 

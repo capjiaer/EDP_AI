@@ -12,12 +12,15 @@ from pathlib import Path
 from typing import Dict, Set
 from tkinter import Tcl
 from edp_center.packages.edp_configkit import tclinterp2dict
+from edp_center.packages.edp_common.error_handler import handle_error
+from edp_center.packages.edp_common.exceptions import ConfigError
 
 from .tcl_type_handler import save_type_info, restore_type_info
 from .tcl_expander import expand_variable_references
 from .blocks_handler import handle_blocks_replacement
 
 
+@handle_error(error_message="Tcl 文件解析失败", reraise=True)
 def process_tcl_file(config_file: Path, shared_interp: Tcl) -> Tcl:
     """
     处理 Tcl 配置文件
@@ -52,10 +55,53 @@ def process_tcl_file(config_file: Path, shared_interp: Tcl) -> Tcl:
     try:
         shared_interp.eval(tcl_content)
     except (RuntimeError, ValueError, SyntaxError) as e:
-        print(f"[ERROR] Tcl 文件解析失败: {abs_path}", file=sys.stderr)
-        print(f"[ERROR] 错误信息: {e}", file=sys.stderr)
-        print(f"[ERROR] 请检查 Tcl 文件格式是否正确", file=sys.stderr)
-        raise
+        # 转换为 ConfigError，提供更多上下文信息
+        error_msg = str(e)
+        
+        # 尝试提取行号信息（如果错误消息中包含）
+        line_number = None
+        if "line " in error_msg.lower():
+            # 尝试提取行号
+            import re
+            match = re.search(r'line\s+(\d+)', error_msg, re.IGNORECASE)
+            if match:
+                line_number = int(match.group(1))
+        
+        # 构建详细的解决建议
+        suggestion_parts = [
+            "请检查 Tcl 文件格式是否正确：",
+            "",
+            "1. 检查语法错误：",
+            "   - 确保所有括号 ()、花括号 {}、方括号 [] 都已正确闭合",
+            "   - 确保所有引号（单引号 ' 或双引号 \"）都已正确闭合",
+            "   - 检查是否有拼写错误",
+            "",
+            "2. 检查变量引用：",
+            "   - 确保所有变量都已定义",
+            "   - 检查变量名是否正确",
+            "",
+            "3. 检查命令语法：",
+            "   - 确保所有 Tcl 命令的语法正确",
+            "   - 检查参数是否正确"
+        ]
+        
+        if line_number:
+            suggestion_parts.insert(2, f"   - 特别注意第 {line_number} 行附近的代码")
+        
+        context = {
+            "config_file": str(abs_path),
+            "error_type": type(e).__name__,
+            "error_message": error_msg
+        }
+        if line_number:
+            context["line_number"] = line_number
+        
+        raise ConfigError(
+            f"Tcl 文件解析失败: {error_msg}",
+            config_file=str(abs_path),
+            context=context,
+            suggestion="\n".join(suggestion_parts)
+        ) from e
     
     # 创建一个临时的 interpreter，只包含当前文件设置的变量
     temp_tcl_interp = Tcl()

@@ -111,6 +111,19 @@ def create_user_directories(work_path: Path, project: str, version: str, blocks_
             user_path = block_path / usr
             user_path.mkdir(parents=True, exist_ok=True)
             
+            # 自动创建默认的 main 分支目录结构（如果不存在）
+            main_branch_path = user_path / 'main'
+            if not main_branch_path.exists():
+                try:
+                    # 导入 BranchManager 来创建分支结构
+                    from edp_center.packages.edp_dirkit.work_path.branch_manager import BranchManager
+                    branch_manager = BranchManager()
+                    # 创建默认的分支结构（cmds, dbs, flow, hooks, logs, rpts, runs 等）
+                    branch_manager.create_branch_structure(main_branch_path)
+                except Exception:
+                    # 如果创建分支结构失败，至少创建 main 目录
+                    main_branch_path.mkdir(parents=True, exist_ok=True)
+            
             # 记录 user 信息（如果不存在或需要更新）
             if usr not in version_info['blocks'][blk_name]['users']:
                 version_info['blocks'][blk_name]['users'][usr] = {

@@ -9,7 +9,9 @@
 import sys
 from pathlib import Path
 from tkinter import Tcl
-from typing import List, Dict, Set
+from typing import List, Dict, Set, Optional
+
+from edp_center.packages.edp_common.exceptions import ValidationError, ConfigError
 
 
 def validate_file_variables_are_arrays(temp_interp: Tcl, abs_path: Path) -> None:
@@ -36,14 +38,40 @@ def validate_file_variables_are_arrays(temp_interp: Tcl, abs_path: Path) -> None
     
     # 如果发现简单变量，抛出错误
     if simple_vars:
-        error_msg = f"在文件 {abs_path} 中发现简单变量（非数组格式），不符合要求。所有变量都必须是数组格式（带命名空间）。\n"
-        error_msg += "不符合要求的变量：\n"
-        for var in sorted(simple_vars):
-            error_msg += f"  - {var}\n"
-        error_msg += "\n请将所有变量改为数组格式，例如：\n"
-        error_msg += "  错误：a: 1\n"
-        error_msg += "  正确：project: {a: 1}  # 生成 set project(a) 1\n"
-        raise ValueError(error_msg)
+        # 构建详细的错误消息
+        error_msg = f"在文件 {abs_path} 中发现简单变量（非数组格式），不符合要求。"
+        
+        # 构建解决建议
+        suggestion_parts = [
+            "所有变量都必须是数组格式（带命名空间），请按以下方式修改：",
+            "",
+            "YAML 格式示例：",
+            "  错误：",
+            "    cpu_num: 32",
+            "  正确：",
+            "    pnr_innovus:",
+            "      place:",
+            "        cpu_num: 32  # 生成 set pnr_innovus(place,cpu_num) 32",
+            "",
+            "Tcl 格式示例：",
+            "  错误：",
+            "    set cpu_num 32",
+            "  正确：",
+            "    set pnr_innovus(place,cpu_num) 32"
+        ]
+        
+        raise ValidationError(
+            error_msg,
+            field_name="变量格式",
+            field_value=f"{len(simple_vars)} 个简单变量",
+            expected="数组格式（带命名空间）",
+            context={
+                "config_file": str(abs_path),
+                "invalid_variables": sorted(simple_vars),
+                "variable_count": len(simple_vars)
+            },
+            suggestion="\n".join(suggestion_parts)
+        )
 
 
 def validate_all_variables_are_arrays(shared_interp: Tcl) -> None:
@@ -70,14 +98,44 @@ def validate_all_variables_are_arrays(shared_interp: Tcl) -> None:
     
     # 如果发现简单变量，抛出错误
     if simple_vars:
-        error_msg = "发现简单变量（非数组格式），不符合要求。所有变量都必须是数组格式（带命名空间）。\n"
-        error_msg += "不符合要求的变量：\n"
-        for var in sorted(simple_vars):
-            error_msg += f"  - {var}\n"
-        error_msg += "\n请将所有变量改为数组格式，例如：\n"
-        error_msg += "  错误：a: 1\n"
-        error_msg += "  正确：project: {a: 1}  # 生成 set project(a) 1\n"
-        raise ValueError(error_msg)
+        # 构建详细的错误消息
+        error_msg = f"发现 {len(simple_vars)} 个简单变量（非数组格式），不符合要求。"
+        
+        # 构建解决建议
+        suggestion_parts = [
+            "所有变量都必须是数组格式（带命名空间），请按以下方式修改：",
+            "",
+            "YAML 格式示例：",
+            "  错误：",
+            "    cpu_num: 32",
+            "  正确：",
+            "    pnr_innovus:",
+            "      place:",
+            "        cpu_num: 32  # 生成 set pnr_innovus(place,cpu_num) 32",
+            "",
+            "Tcl 格式示例：",
+            "  错误：",
+            "    set cpu_num 32",
+            "  正确：",
+            "    set pnr_innovus(place,cpu_num) 32",
+            "",
+            f"需要修改的变量（共 {len(simple_vars)} 个）：",
+        ]
+        suggestion_parts.extend([f"  - {var}" for var in sorted(simple_vars)[:10]])
+        if len(simple_vars) > 10:
+            suggestion_parts.append(f"  ... 还有 {len(simple_vars) - 10} 个变量")
+        
+        raise ValidationError(
+            error_msg,
+            field_name="变量格式",
+            field_value=f"{len(simple_vars)} 个简单变量",
+            expected="数组格式（带命名空间）",
+            context={
+                "invalid_variables": sorted(simple_vars),
+                "variable_count": len(simple_vars)
+            },
+            suggestion="\n".join(suggestion_parts)
+        )
 
 
 def _check_variables_are_arrays(interp: Tcl, vars_to_check: set) -> List[str]:

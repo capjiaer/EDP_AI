@@ -1,7 +1,7 @@
 # 项目配置
 # 所有配置都在 project 下，这样转成 Tcl 时可以通过 project(var_name) 访问
 project:
-  name: dongting
+  name: dongting1
   version: P85
   
   # 允许 init 的工作路径列表（安全控制）
@@ -9,7 +9,8 @@ project:
   # 支持绝对路径和相对路径（相对于 edp_center 的父目录）
   # 如果为空列表或未设置，则使用 init_project.yaml 的配置
   allowed_work_paths:
-    - "/c/Users/anping.chen/Desktop/EDP_AI/Example/WORK_PATH"            # 相对路径（相对于 edp_center 的父目录，推荐）
+    - "/c/Users/anping.chen/Desktop/EDP_AI/Example/WORK_PATH"
+    - "/c/Users/capjiaer/Desktop/cursor/EDP_AI/Example/WORK_PATH"            # 相对路径（相对于 edp_center 的父目录，推荐）
     # - "/absolute/path/to/WORK_PATH"  # 绝对路径示例（Windows: C:/path/to/WORK_PATH）
     # - "/c/Users/.../WORK_PATH"       # Unix 风格路径（会自动转换）
   

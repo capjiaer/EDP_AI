@@ -12,6 +12,8 @@ from pathlib import Path
 from typing import Dict, Optional
 from tkinter import Tcl
 from edp_center.packages.edp_configkit import dict2tclinterp
+from edp_center.packages.edp_common.error_handler import handle_error
+from edp_center.packages.edp_common.exceptions import ConfigError
 
 from .tcl_type_handler import save_type_info, restore_type_info
 from .tcl_expander import expand_variable_references
@@ -104,6 +106,7 @@ def _copy_interp_vars(source_interp: Tcl, target_interp: Tcl) -> None:
             pass
 
 
+@handle_error(error_message="YAML 文件解析失败", reraise=True)
 def process_yaml_file(config_file: Path, shared_interp: Tcl) -> Optional[Tcl]:
     """
     处理 YAML 配置文件
@@ -125,10 +128,65 @@ def process_yaml_file(config_file: Path, shared_interp: Tcl) -> Optional[Tcl]:
         try:
             config_dict = yaml.safe_load(yf) or {}
         except yaml.YAMLError as e:
-            print(f"[ERROR] YAML 文件解析失败: {abs_path}", file=sys.stderr)
-            print(f"[ERROR] 错误信息: {e}", file=sys.stderr)
-            print(f"[ERROR] 请检查 YAML 文件格式是否正确（例如：引号是否闭合）", file=sys.stderr)
-            raise
+            # 转换为 ConfigError，提供更多上下文信息
+            error_msg = str(e)
+            
+            # 尝试提取行号和列号信息
+            line_number = None
+            column_number = None
+            if hasattr(e, 'problem_mark'):
+                mark = e.problem_mark
+                line_number = mark.line + 1  # YAML 行号从 0 开始
+                column_number = mark.column + 1  # YAML 列号从 0 开始
+            
+            # 构建详细的解决建议
+            suggestion_parts = [
+                "请检查 YAML 文件格式是否正确：",
+                ""
+            ]
+            
+            if line_number:
+                suggestion_parts.append(f"错误位置：第 {line_number} 行")
+                if column_number:
+                    suggestion_parts.append(f"          第 {column_number} 列")
+                suggestion_parts.append("")
+            
+            suggestion_parts.extend([
+                "常见问题：",
+                "1. 缩进错误：",
+                "   - YAML 使用空格缩进，不要使用 Tab",
+                "   - 确保缩进一致（通常使用 2 个空格）",
+                "",
+                "2. 引号问题：",
+                "   - 确保所有引号（单引号 ' 或双引号 \"）都已正确闭合",
+                "   - 如果字符串包含特殊字符，需要用引号括起来",
+                "",
+                "3. 列表和字典格式：",
+                "   - 列表使用 - 开头",
+                "   - 字典使用 key: value 格式",
+                "   - 确保冒号后面有空格",
+                "",
+                "4. 特殊字符：",
+                "   - 如果值包含冒号、引号等特殊字符，需要用引号括起来",
+                "   - 检查是否有未转义的特殊字符"
+            ])
+            
+            context = {
+                "config_file": str(abs_path),
+                "error_type": type(e).__name__,
+                "error_message": error_msg
+            }
+            if line_number:
+                context["line_number"] = line_number
+            if column_number:
+                context["column_number"] = column_number
+            
+            raise ConfigError(
+                f"YAML 文件解析失败: {error_msg}",
+                config_file=str(abs_path),
+                context=context,
+                suggestion="\n".join(suggestion_parts)
+            ) from e
     
     if not config_dict:
         return None
