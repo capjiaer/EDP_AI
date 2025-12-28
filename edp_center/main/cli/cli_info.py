@@ -50,35 +50,50 @@ def main():
         from .commands import handle_info_cmd
         return handle_info_cmd(manager, args)
     
-    # 处理 -history 命令（新增，待实现）
-    if args.history is not None:
-        # TODO: 实现历史查询功能
-        print("⚠️  历史查询功能正在开发中，敬请期待", file=sys.stderr)
-        print("   提示: 可以查看 .run_info 文件获取运行历史", file=sys.stderr)
-        return 0
+    # 处理 -history 命令
+    # 需要检查命令行参数，因为 nargs='?' 时 None 也可能表示提供了选项
+    has_history = any(arg in ('-history', '--history', '-hist') for arg in sys.argv)
+    if has_history:
+        manager = create_manager(edp_center_path)
+        try:
+            from .commands.history_handler import handle_history_cmd
+            return handle_history_cmd(manager, args)
+        except ImportError as e:
+            print(f"错误: 无法导入历史查询处理器: {e}", file=sys.stderr)
+            return 1
     
-    # 处理 -stats 命令（新增，待实现）
-    if args.stats is not None:
-        # TODO: 实现性能分析功能
-        print("⚠️  性能分析功能正在开发中，敬请期待", file=sys.stderr)
-        return 0
+    # 处理 -stats 命令
+    # 需要检查命令行参数，因为 nargs='?' 时 None 也可能表示提供了选项
+    has_stats = any(arg in ('-stats', '--stats') for arg in sys.argv)
+    if has_stats:
+        manager = create_manager(edp_center_path)
+        try:
+            from .commands.stats_handler import handle_stats_cmd
+            return handle_stats_cmd(manager, args)
+        except ImportError as e:
+            print(f"错误: 无法导入性能分析处理器: {e}", file=sys.stderr)
+            return 1
     
-    # 处理 -rollback 命令（新增，待实现）
-    if args.rollback is not None:
+    # 处理 -rollback 命令（待实现）
+    # 需要检查命令行参数，因为 nargs='?' 时 None 也可能表示提供了选项
+    has_rollback = any(arg in ('-rollback', '--rollback') for arg in sys.argv)
+    if has_rollback:
         # TODO: 实现回滚功能
         print("⚠️  回滚功能正在开发中，敬请期待", file=sys.stderr)
         return 0
     
-    # 处理 -validate 命令（新增，待实现）
-    if args.validate is not None:
+    # 处理 -validate 命令（待实现）
+    # 需要检查命令行参数，因为 nargs='?' 时 None 也可能表示提供了选项
+    has_validate = any(arg in ('-validate', '--validate', '-val') for arg in sys.argv)
+    if has_validate:
         # TODO: 实现结果验证功能
         print("⚠️  结果验证功能正在开发中，敬请期待", file=sys.stderr)
         return 0
     
     # 如果没有提供命令，显示帮助
-    if not (has_info_flag or args.tutorial or 
-            args.history is not None or args.stats is not None or 
-            args.rollback is not None or args.validate is not None):
+    
+    if not (has_info_flag or args.tutorial or has_history or has_stats or 
+            has_rollback or has_validate):
         parser.print_help()
         return 1
     
