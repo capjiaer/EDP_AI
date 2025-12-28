@@ -17,7 +17,9 @@ class BranchManager:
     """分支管理器"""
     
     # 默认的分支目录结构
-    DEFAULT_BRANCH_DIRS = ['cmds', 'dbs', 'flow', 'hooks', 'logs', 'rpts', 'runs']
+    # 注意：实际项目中使用的目录是 cmds, data, hooks, runs
+    # logs 和 rpts 会在运行时自动创建，不需要在 init 时创建
+    DEFAULT_BRANCH_DIRS = ['cmds', 'data', 'hooks', 'runs']
     
     # 默认的分支文件
     DEFAULT_BRANCH_FILES = ['user_config.tcl', 'user_config.yaml']

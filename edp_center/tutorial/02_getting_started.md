@@ -77,14 +77,15 @@ edp_init -init
         ├── .edp_version           # 项目版本信息文件
         ├── block1/                # 块1
         │   ├── user1/             # 用户1
-        │   │   └── main/          # 默认分支
-        │   │       ├── cmds/      # 命令脚本目录
-        │   │       ├── hooks/     # Hooks 目录
-        │   │       ├── runs/      # 运行目录
-        │   │       ├── logs/      # 日志目录
-        │   │       ├── rpts/      # 报告目录
-        │   │       ├── data/      # 数据目录
-        │   │       └── .run_info  # 运行信息文件
+        │   │   └── main/          # 默认分支（自动创建）
+        │   │       ├── cmds/      # 命令脚本目录（生成的 Tcl 脚本）
+        │   │       ├── data/      # 数据目录（数据文件，用于 RELEASE）
+        │   │       ├── hooks/     # Hooks 目录（自定义 hooks）
+        │   │       ├── runs/      # 运行目录（运行时临时文件）
+        │   │       ├── user_config.tcl   # 用户配置文件（TCL格式）
+        │   │       ├── user_config.yaml  # 用户配置文件（YAML格式）
+        │   │       └── .run_info  # 运行信息文件（运行后生成）
+        │   │       # 注意：logs/ 和 rpts/ 会在运行时自动创建
         │   └── user2/             # 用户2
         │       └── main/          # 默认分支
         └── block2/                # 块2

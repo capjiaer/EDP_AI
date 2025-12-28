@@ -118,7 +118,8 @@ def create_user_directories(work_path: Path, project: str, version: str, blocks_
                     # 导入 BranchManager 来创建分支结构
                     from edp_center.packages.edp_dirkit.work_path.branch_manager import BranchManager
                     branch_manager = BranchManager()
-                    # 创建默认的分支结构（cmds, dbs, flow, hooks, logs, rpts, runs 等）
+                    # 创建默认的分支结构（cmds, data, hooks, runs 等）
+                    # 注意：logs 和 rpts 会在运行时自动创建，不需要在 init 时创建
                     branch_manager.create_branch_structure(main_branch_path)
                 except Exception:
                     # 如果创建分支结构失败，至少创建 main 目录

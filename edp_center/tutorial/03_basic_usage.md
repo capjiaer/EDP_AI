@@ -16,13 +16,13 @@ WORK_PATH/
             └── {user}/      # 用户名
                 └── {branch}/# 分支名称
                     ├── cmds/      # 命令脚本目录（生成的 Tcl 脚本）
+                    ├── data/      # 数据目录（数据文件，用于 RELEASE）
                     ├── hooks/     # Hooks 目录（自定义 hooks）
                     ├── runs/      # 运行目录（运行时临时文件）
-                    ├── logs/      # 日志目录（运行日志）
-                    ├── rpts/      # 报告目录（报告文件）
-                    ├── data/      # 数据目录（数据文件）
-                    ├── user_config.yaml  # 用户配置文件（可选）
-                    └── .run_info  # 运行信息文件（执行状态）
+                    ├── user_config.tcl   # 用户配置文件（TCL格式，自动创建）
+                    ├── user_config.yaml  # 用户配置文件（YAML格式，自动创建）
+                    └── .run_info  # 运行信息文件（执行状态，运行后生成）
+                    # 注意：logs/ 和 rpts/ 会在运行时自动创建
 ```
 
 **关键目录说明**：
@@ -34,9 +34,11 @@ WORK_PATH/
   - 格式：`runs/{flow_name}.{step_name}/` - 统一使用点号分隔
 - `logs/`: 存放运行日志
   - 格式：`logs/{flow_name}.{step_name}/` - 统一使用点号分隔
-- `rpts/`: 存放报告文件
+- `rpts/`: 存放报告文件（运行时自动创建）
   - 格式：`rpts/{flow_name}.{step_name}/` - 统一使用点号分隔
-- `data/`: 存放数据文件
+- `logs/`: 存放运行日志（运行时自动创建）
+  - 格式：`logs/{flow_name}.{step_name}/` - 统一使用点号分隔
+- `data/`: 存放数据文件（用于 RELEASE）
   - 格式：`data/{flow_name}.{step_name}/` - 统一使用点号分隔
 
 **目录命名规则**：
