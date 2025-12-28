@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Optional, Dict
 
 try:
-    from configkit import files2dict
+    from edp_center.packages.edp_configkit import files2dict
 except ImportError:
     # 如果 configkit 不可用，提供一个简单的 fallback
     import yaml

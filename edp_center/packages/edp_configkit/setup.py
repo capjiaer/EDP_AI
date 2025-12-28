@@ -6,7 +6,7 @@ import re
 from setuptools import setup, find_packages
 
 # 读取版本号
-with open(os.path.join('configkit', 'configkit', '__init__.py'), 'r', encoding='utf-8') as f:
+with open(os.path.join('__init__.py'), 'r', encoding='utf-8') as f:
     version_match = re.search(r"^__version__ = ['\"]([^'\"]*)['\"]", f.read(), re.M)
     if version_match:
         version = version_match.group(1)

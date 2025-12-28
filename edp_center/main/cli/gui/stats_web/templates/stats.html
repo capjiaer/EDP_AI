@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EDP 性能分析</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div>
+                <h1>📊 性能分析</h1>
+                <div class="subtitle">实时监控执行性能，优化工作流程</div>
+            </div>
+            <button class="btn" onclick="loadStats()">🔄 刷新数据</button>
+        </div>
+        
+        <div class="filters">
+            <div class="filter-group">
+                <label>步骤筛选</label>
+                <select id="stepFilter" onchange="loadStats()">
+                    <option value="">所有步骤</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>时间范围</label>
+                <select id="timeRange" onchange="loadStats()">
+                    <option value="all">全部</option>
+                    <option value="7">最近7天</option>
+                    <option value="30">最近30天</option>
+                    <option value="90">最近90天</option>
+                </select>
+            </div>
+        </div>
+        
+        <div id="loading" class="loading">
+            <div class="loading-spinner"></div>
+            <div>正在加载数据...</div>
+        </div>
+        
+        <div id="statsContent" style="display: none;">
+            <!-- 统计卡片 -->
+            <div class="stats-grid" id="statsCards"></div>
+            
+            <!-- 执行时长趋势图 -->
+            <div class="chart-section">
+                <div class="chart-title">
+                    <span class="chart-title-icon">⏱️</span>
+                    <span>执行时长趋势</span>
+                </div>
+                <div class="chart-container">
+                    <canvas id="durationChart"></canvas>
+                </div>
+            </div>
+            
+            <!-- 成功率趋势图 -->
+            <div class="chart-section">
+                <div class="chart-title">
+                    <span class="chart-title-icon">✅</span>
+                    <span>成功率趋势</span>
+                </div>
+                <div class="chart-container">
+                    <canvas id="successRateChart"></canvas>
+                </div>
+            </div>
+            
+            <!-- 资源使用趋势图 -->
+            <div class="chart-section">
+                <div class="chart-title">
+                    <span class="chart-title-icon">💻</span>
+                    <span>资源使用趋势</span>
+                </div>
+                <div class="chart-container">
+                    <canvas id="resourceChart"></canvas>
+                </div>
+            </div>
+            
+            <!-- 步骤统计表格 -->
+            <div class="table-section">
+                <div class="chart-title">
+                    <span class="chart-title-icon">📈</span>
+                    <span>按步骤统计</span>
+                </div>
+                <div class="table-wrapper">
+                    <table id="stepStatsTable">
+                        <thead>
+                            <tr>
+                                <th>步骤</th>
+                                <th>执行次数</th>
+                                <th>成功率</th>
+                                <th>平均时长</th>
+                                <th>最短时长</th>
+                                <th>最长时长</th>
+                                <th>平均CPU</th>
+                                <th>平均内存</th>
+                            </tr>
+                        </thead>
+                        <tbody id="stepStatsBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <div id="errorContent" style="display: none;" class="error">
+            <div class="error-icon">❌</div>
+            <div id="errorMessage"></div>
+        </div>
+    </div>
+    
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

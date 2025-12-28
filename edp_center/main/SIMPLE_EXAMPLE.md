@@ -51,24 +51,13 @@ results = manager.run_full_workflow(
 ### 方式 2: 命令行（CLI）
 
 ```bash
-# 1. 初始化用户工作空间
-edp-main init-workspace \
-  --work-path WORK_PATH \
-  --project dongting \
-  --project-node P85 \
-  --block block1 \
-  --user zhangsan \
-  --branch branch1
+# 1. 创建分支
+edp -b branch1 -prj dongting -v P85 --block block1 --user zhangsan
 
-# 2. 执行完整工作流（推荐）
-edp-main run \
-  --work-path WORK_PATH \
-  --project dongting \
-  --project-node P85 \
-  --block block1 \
-  --user zhangsan \
-  --branch branch1 \
-  --flow pv_calibre
+# 2. 执行流程/步骤（推荐）
+edp -run pv_calibre.ipmerge
+# 或执行多个步骤
+edp -run -fr pnr_innovus.place -to pv_calibre.drc
 ```
 
 ## 完整工作流程
@@ -76,15 +65,10 @@ edp-main run \
 ### 场景：运行 pv_calibre 流程
 
 ```bash
-# 一步完成所有操作
-edp-main run \
-  --work-path WORK_PATH \
-  --project dongting \
-  --project-node P85 \
-  --block block1 \
-  --user zhangsan \
-  --branch branch1 \
-  --flow pv_calibre
+# 执行流程/步骤（自动推断项目信息）
+edp -run pv_calibre.ipmerge
+# 或执行多个步骤
+edp -run -fr pnr_innovus.place -to pv_calibre.drc
 ```
 
 这会自动：
@@ -99,24 +83,12 @@ edp-main run \
 
 ```bash
 # 从 branch1 的 pnr_innovus.init 步骤创建 branch2
-edp-main init-workspace \
-  --work-path WORK_PATH \
-  --project dongting \
-  --project-node P85 \
-  --block block1 \
-  --user zhangsan \
-  --branch branch2 \
-  --from-branch-step "branch1:pnr_innovus.init"
+edp -b branch2 --from-branch-step "branch1:pnr_innovus.init"
 
 # 然后在 branch2 上运行流程
-edp-main run \
-  --work-path WORK_PATH \
-  --project dongting \
-  --project-node P85 \
-  --block block1 \
-  --user zhangsan \
-  --branch branch2 \
-  --flow pv_calibre
+edp -run pv_calibre.ipmerge
+# 或执行多个步骤
+edp -run -fr pnr_innovus.place -to pv_calibre.drc
 ```
 
 ## 跨 flow 依赖自动发现

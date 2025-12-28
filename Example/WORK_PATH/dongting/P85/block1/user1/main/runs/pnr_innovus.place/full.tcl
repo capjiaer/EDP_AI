@@ -7,23 +7,6 @@
 #   - C:\Users\anping.chen\Desktop\EDP_AI\edp_center\config\SAMSUNG\S8\dongting\pnr_innovus\config.yaml
 #   - C:\Users\anping.chen\Desktop\EDP_AI\Example\WORK_PATH\dongting\P85\block1\user1\main\user_config.yaml
 
-# Auto-generated project variables
-set project(project_name) dongting
-set project(version) P85
-set project(block_name) block1
-set project(user_name) user1
-set project(branch_name) main
-set project(foundry) SAMSUNG
-set project(node) S8
-set project(flow_name) pnr_innovus
-set project(step_name) place
-set project(init_path) "C:\Users\anping.chen\Desktop\EDP_AI\Example\WORK_PATH\dongting\P85\block1\user1\main"
-set project(work_path) "C:\Users\anping.chen\Desktop\EDP_AI\Example\WORK_PATH\dongting\P85\block1\user1\main\runs\pnr_innovus.place"
-set edp(edp_center_path) "C:\Users\anping.chen\Desktop\EDP_AI\edp_center"
-set edp(config_path) "C:\Users\anping.chen\Desktop\EDP_AI\edp_center\config"
-set edp(flow_path) "C:\Users\anping.chen\Desktop\EDP_AI\edp_center\flow"
-set edp(execution_plan,place) {pnr_innovus::restore_design pnr_innovus::config_design pnr_innovus::add_tie_cell pnr_innovus::save_design pnr_innovus::report_design pnr_innovus::check_pd pnr_innovus::save_metrics}
-
 
 # From C:\Users\anping.chen\Desktop\EDP_AI\edp_center\config\SAMSUNG\S8\common\main\init_project.yaml
 set edp(branch_template,directories) {cmds dbs flow hooks logs rpts runs}
@@ -107,6 +90,7 @@ set release(step_rules,postroute,file_mappings,sdf) results/*.sdf
 set release(step_rules,postroute,file_mappings,spef) results/*.spef
 set release(step_rules,postroute,file_mappings,timing) {timing/postroute.csv timing/**/*.csv}
 set release(step_rules,postroute,file_mappings,verilog) {netlist/*.v netlist/*.vg}
+
 # Auto-generated project variables
 set project(project_name) dongting
 set project(version) P85
@@ -117,7 +101,7 @@ set project(foundry) SAMSUNG
 set project(node) S8
 set project(flow_name) pnr_innovus
 set project(step_name) place
-set project(init_path) "C:\Users\anping.chen\Desktop\EDP_AI\Example\WORK_PATH\dongting\P85\block1\user1\main"
+set project(init_path) "C:\Users\anping.chen\Desktop\EDP_AI\Example\WORK_PATH"
 set project(work_path) "C:\Users\anping.chen\Desktop\EDP_AI\Example\WORK_PATH\dongting\P85\block1\user1\main\runs\pnr_innovus.place"
 set edp(edp_center_path) "C:\Users\anping.chen\Desktop\EDP_AI\edp_center"
 set edp(config_path) "C:\Users\anping.chen\Desktop\EDP_AI\edp_center\config"
@@ -128,7 +112,16 @@ set edp(execution_plan,place) {pnr_innovus::restore_design pnr_innovus::config_d
 # Type information for configkit
 array set __configkit_types__ {}
 set __configkit_types__(edp(branch_template,directories)) list
+set __configkit_types__(edp(branch_template,directories),0) string
+set __configkit_types__(edp(branch_template,directories),1) string
+set __configkit_types__(edp(branch_template,directories),2) string
+set __configkit_types__(edp(branch_template,directories),3) string
+set __configkit_types__(edp(branch_template,directories),4) string
+set __configkit_types__(edp(branch_template,directories),5) string
+set __configkit_types__(edp(branch_template,directories),6) string
 set __configkit_types__(edp(branch_template,files)) list
+set __configkit_types__(edp(branch_template,files),0) string
+set __configkit_types__(edp(branch_template,files),1) string
 set __configkit_types__(pnr_innovus(default,cpu_num)) number
 set __configkit_types__(pnr_innovus(default,lsf)) number
 set __configkit_types__(pnr_innovus(default,lsf_max_wait_time)) number
@@ -153,6 +146,8 @@ set __configkit_types__(pnr_innovus(route,memory)) number
 set __configkit_types__(pnr_innovus(route,wait_lsf)) bool
 set __configkit_types__(project(allowed_work_paths)) list
 set __configkit_types__(project(blocks)) list
+set __configkit_types__(project(blocks),0) string
+set __configkit_types__(project(blocks),1) string
 set __configkit_types__(project(node_naming_pattern)) string
 set __configkit_types__(project(work_path_name)) string
 set __configkit_types__(pv_calibre(default,cpu_num)) number
@@ -181,6 +176,9 @@ set __configkit_types__(release(file_mappings,timing)) string
 set __configkit_types__(release(file_mappings,upf)) string
 set __configkit_types__(release(file_mappings,verilog)) string
 set __configkit_types__(release(keep_structure)) list
+set __configkit_types__(release(keep_structure),0) string
+set __configkit_types__(release(keep_structure),1) string
+set __configkit_types__(release(keep_structure),2) string
 set __configkit_types__(release(step_rules,floorplan,file_mappings,config)) string
 set __configkit_types__(release(step_rules,floorplan,file_mappings,db)) string
 set __configkit_types__(release(step_rules,floorplan,file_mappings,def)) string

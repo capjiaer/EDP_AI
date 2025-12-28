@@ -226,7 +226,7 @@ def execute_single_step(manager, args, flow_step: str) -> int:
         should_prepend_sources = True
         merged_config = {}  # 初始化为空字典，避免未定义错误
         try:
-            from edp_center.packages.edp_configkit.configkit.configkit import tclfiles2tclinterp, tclinterp2dict
+            from edp_center.packages.edp_configkit import tclfiles2tclinterp, tclinterp2dict
             from edp_center.packages.edp_flowkit.flowkit.run_graph import get_flow_var
             from edp_center.packages.edp_flowkit.flowkit import Step
             
@@ -305,7 +305,7 @@ def execute_single_step(manager, args, flow_step: str) -> int:
         
         # ==================== 执行生成的脚本 ====================
         # 从 full.tcl 中读取配置
-        from edp_center.packages.edp_configkit.configkit.configkit import tclfiles2tclinterp, tclinterp2dict
+        from edp_center.packages.edp_configkit import tclfiles2tclinterp, tclinterp2dict
         from edp_center.packages.edp_flowkit.flowkit import Step
         from edp_center.packages.edp_flowkit.flowkit import ICCommandExecutor
         

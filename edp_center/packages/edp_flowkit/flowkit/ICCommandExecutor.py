@@ -180,20 +180,48 @@ class ICCommandExecutor:
         logger.info(f"工作目录: {work_dir}")
         logger.info(f"日志文件: {log_file}")
 
+        # 初始化 execution_info
+        if not hasattr(step, 'execution_info'):
+            step.execution_info = {}
+        
+        start_time = time.time()
+        step.execution_info['start_time'] = start_time
+        
         # 演示模式
         if self.dry_run:
             logger.info(f"[演示模式] 步骤 {step_name} 将在 {work_dir} 执行命令: {cmd}")
+            step.execution_info['success'] = True
+            step.execution_info['duration'] = 0
             return True
 
         try:
             if use_lsf:
                 wait_lsf = get_flow_var(step, "wait_lsf", merged_var, default=True)
-                return self._run_lsf(step, cmd, log_file, work_dir, merged_var, wait_lsf)
+                success = self._run_lsf(step, cmd, log_file, work_dir, merged_var, wait_lsf)
             else:
                 timeout = get_flow_var(step, "timeout", merged_var, default=None)  # 默认为None，表示没有超时限制
-                return self._run_local(step, cmd, log_file, work_dir, timeout)
+                success = self._run_local(step, cmd, log_file, work_dir, timeout)
+            
+            # 记录执行结果
+            end_time = time.time()
+            duration = end_time - start_time
+            step.execution_info['success'] = success
+            step.execution_info['duration'] = duration
+            step.execution_info['end_time'] = end_time
+            
+            # 如果失败，记录错误信息
+            if not success:
+                step.execution_info['error'] = f"步骤 {step_name} 执行失败"
+            
+            return success
         except Exception as e:
             logger.error(f"步骤 {step_name} 执行出错: {str(e)}")
+            end_time = time.time()
+            duration = end_time - start_time
+            step.execution_info['success'] = False
+            step.execution_info['duration'] = duration
+            step.execution_info['end_time'] = end_time
+            step.execution_info['error'] = str(e)
             return False
 
     def _prepare_command(self, step, merged_var, cmd_file, log_file, dirs):
@@ -396,7 +424,11 @@ class ICCommandExecutor:
 
             # 检查作业是否成功提交
             if result.returncode != 0:
-                logger.error(f"步骤 {step.name} 提交到LSF失败: {result.stdout}")
+                error_msg = result.stdout.strip() if result.stdout else "未知错误"
+                logger.error(f"步骤 {step.name} 提交到LSF失败: {error_msg}")
+                # 记录错误信息到 execution_info
+                if hasattr(step, 'execution_info'):
+                    step.execution_info['error'] = f"LSF提交失败: {error_msg}"
                 return False
 
             # 提取作业ID
@@ -408,10 +440,18 @@ class ICCommandExecutor:
                     break
 
             if not job_id:
-                logger.error(f"无法获取步骤 {step.name} 的LSF作业ID")
+                error_msg = "无法获取LSF作业ID"
+                logger.error(f"{error_msg}: {step.name}")
+                # 记录错误信息到 execution_info
+                if hasattr(step, 'execution_info'):
+                    step.execution_info['error'] = error_msg
                 return False
 
             logger.info(f"步骤 {step.name} 已成功提交到LSF，作业ID: {job_id}")
+            
+            # 记录 job_id 到 execution_info
+            if hasattr(step, 'execution_info'):
+                step.execution_info['job_id'] = job_id
 
             # 如果不需要等待，直接返回成功
             if not wait_lsf:

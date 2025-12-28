@@ -18,8 +18,8 @@ from ..init.workspace_helpers import (
 from ..init.params import infer_params_from_version_file
 
 
-def handle_init_workspace(manager: WorkflowManager, args) -> int:
-    """处理 init-workspace 命令（包括 -b 选项）"""
+def handle_create_branch(manager: WorkflowManager, args) -> int:
+    """处理 -b/--branch 命令（创建分支）"""
     try:
         current_dir = Path.cwd()
         

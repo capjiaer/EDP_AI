@@ -13,13 +13,14 @@ import tempfile
 from tkinter import Tcl
 import yaml
 
-from configkit import (
+from edp_center.packages.edp_configkit import (
     merge_dict,
     dict2tclinterp,
     tclinterp2dict,
     yamlfiles2tclfile,
     tclfiles2yamlfile,
-    files2dict
+    files2dict,
+    yamlfiles2dict
 )
 
 def example_dict_operations():
@@ -123,8 +124,69 @@ def example_file_conversion():
             if os.path.exists(path):
                 os.remove(path)
 
+def example_variable_references():
+    """YAML 变量引用示例 (YAML Variable References Example)"""
+    print("\n=== YAML 变量引用示例 (YAML Variable References Example) ===")
+    
+    # 创建包含变量引用的 YAML 文件
+    yaml_content = """
+# 简单变量引用
+base_port: 8080
+server_port: $base_port
+api_port: ${base_port}
+
+# 嵌套字典引用
+database:
+  host: localhost
+  port: 5432
+db_url: "postgres://${database(host)}:${database(port)}/mydb"
+
+# 深层嵌套引用
+app:
+  config:
+    timeout: 30
+timeout_value: $app(config,timeout)
+
+# 字符串中的变量引用
+prefix: "http://"
+suffix: "/api"
+api_url: "${prefix}example.com${suffix}"
+"""
+    
+    with tempfile.NamedTemporaryFile(suffix='.yaml', delete=False, mode='w', encoding='utf-8') as yaml_file:
+        yaml_file.write(yaml_content)
+        yaml_path = yaml_file.name
+    
+    try:
+        # 加载 YAML 文件（默认启用变量展开）
+        config = yamlfiles2dict(yaml_path)
+        
+        print("YAML 内容:")
+        print(yaml_content)
+        print("\n解析结果（变量已展开）:")
+        for key, value in config.items():
+            print(f"  {key}: {repr(value)}")
+        
+        print("\n验证变量引用:")
+        print(f"  base_port = {config.get('base_port')}")
+        print(f"  server_port = {config.get('server_port')} (引用 base_port)")
+        print(f"  api_port = {config.get('api_port')} (引用 base_port)")
+        print(f"  db_url = {config.get('db_url')} (引用 database(host) 和 database(port))")
+        print(f"  timeout_value = {config.get('timeout_value')} (引用 app(config,timeout))")
+        print(f"  api_url = {config.get('api_url')} (引用 prefix 和 suffix)")
+        
+        # 测试禁用变量展开
+        print("\n禁用变量展开:")
+        config_no_expand = yamlfiles2dict(yaml_path, expand_variables=False)
+        print(f"  server_port (未展开) = {config_no_expand.get('server_port')}")
+        
+    finally:
+        if os.path.exists(yaml_path):
+            os.remove(yaml_path)
+
 if __name__ == "__main__":
     print("ConfigKit 使用示例 (Usage Examples)")
     example_dict_operations()
     example_tcl_conversion()
     example_file_conversion()
+    example_variable_references()

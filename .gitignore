@@ -1,0 +1,38 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+**/__pycache__/
+*.cpython-*.pyc
+
+# EDP specific
+*.pyc
+*.pyo
+*.pyd
+
+# Test data (路径太长，Windows 限制)
+edp_center/packages/edp_libkit/tests/LIB_Example/
+edp_center/packages/edp_libkit/tests/output_*/
+edp_center/packages/edp_libkit/tests/nul
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.log
+*.bak
+

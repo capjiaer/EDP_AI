@@ -122,6 +122,161 @@ class WorkflowWebServer:
             """获取所有步骤状态"""
             return jsonify({'success': True, 'data': self.step_status})
         
+        # ==================== 性能分析 API ====================
+        @self.app.route('/api/stats/overall', methods=['GET'])
+        def get_overall_stats():
+            """获取总体性能统计"""
+            try:
+                from ...commands.stats_handler import load_run_history, calculate_stats
+                from ...utils import infer_work_path_info, infer_project_info
+                from pathlib import Path
+                
+                # 获取当前工作目录（从请求参数或使用默认值）
+                work_path_param = request.args.get('work_path')
+                if work_path_param:
+                    current_dir = Path(work_path_param).resolve()
+                else:
+                    # 如果没有提供，尝试从 manager 获取
+                    if self.manager:
+                        # 尝试从 manager 获取基础路径
+                        current_dir = Path.cwd()
+                    else:
+                        return jsonify({'success': False, 'error': '无法确定工作路径，请提供 work_path 参数'}), 400
+                
+                # 推断项目信息
+                class Args:
+                    pass
+                args = Args()
+                project_info = infer_project_info(self.manager, current_dir, args)
+                if not project_info:
+                    return jsonify({'success': False, 'error': '无法推断项目信息'}), 400
+                
+                # 推断工作路径信息
+                work_path_info = infer_work_path_info(current_dir, args, project_info)
+                if not work_path_info:
+                    return jsonify({'success': False, 'error': '无法推断工作路径信息'}), 400
+                
+                # 构建 branch 目录路径
+                work_path = Path(work_path_info['work_path']).resolve()
+                project = work_path_info['project']
+                version = work_path_info['version']
+                block = work_path_info['block']
+                user = work_path_info['user']
+                branch = work_path_info['branch']
+                branch_dir = work_path / project / version / block / user / branch
+                
+                runs = load_run_history(branch_dir)
+                stats = calculate_stats(runs)
+                
+                return jsonify({'success': True, 'data': stats})
+            except Exception as e:
+                import traceback
+                return jsonify({'success': False, 'error': f'{str(e)}\n{traceback.format_exc()}'}), 500
+        
+        @self.app.route('/api/stats/steps', methods=['GET'])
+        def get_step_stats():
+            """获取按步骤分组的性能统计"""
+            try:
+                from ...commands.stats_handler import load_run_history, calculate_step_stats
+                from ...utils import infer_work_path_info, infer_project_info
+                from pathlib import Path
+                
+                # 获取当前工作目录
+                work_path_param = request.args.get('work_path')
+                if work_path_param:
+                    current_dir = Path(work_path_param).resolve()
+                else:
+                    current_dir = Path.cwd()
+                
+                # 推断项目信息
+                class Args:
+                    pass
+                args = Args()
+                project_info = infer_project_info(self.manager, current_dir, args)
+                if not project_info:
+                    return jsonify({'success': False, 'error': '无法推断项目信息'}), 400
+                
+                # 推断工作路径信息
+                work_path_info = infer_work_path_info(current_dir, args, project_info)
+                if not work_path_info:
+                    return jsonify({'success': False, 'error': '无法推断工作路径信息'}), 400
+                
+                # 构建 branch 目录路径
+                work_path = Path(work_path_info['work_path']).resolve()
+                project = work_path_info['project']
+                version = work_path_info['version']
+                block = work_path_info['block']
+                user = work_path_info['user']
+                branch = work_path_info['branch']
+                branch_dir = work_path / project / version / block / user / branch
+                
+                runs = load_run_history(branch_dir)
+                step_stats = calculate_step_stats(runs)
+                
+                return jsonify({'success': True, 'data': step_stats})
+            except Exception as e:
+                import traceback
+                return jsonify({'success': False, 'error': f'{str(e)}\n{traceback.format_exc()}'}), 500
+        
+        @self.app.route('/api/stats/history', methods=['GET'])
+        def get_stats_history():
+            """获取历史记录（用于趋势分析）"""
+            try:
+                from ...commands.stats_handler import load_run_history, filter_history
+                from ...utils import infer_work_path_info, infer_project_info
+                from pathlib import Path
+                
+                # 获取当前工作目录
+                work_path_param = request.args.get('work_path')
+                if work_path_param:
+                    current_dir = Path(work_path_param).resolve()
+                else:
+                    current_dir = Path.cwd()
+                
+                # 推断项目信息
+                class Args:
+                    pass
+                args = Args()
+                project_info = infer_project_info(self.manager, current_dir, args)
+                if not project_info:
+                    return jsonify({'success': False, 'error': '无法推断项目信息'}), 400
+                
+                # 推断工作路径信息
+                work_path_info = infer_work_path_info(current_dir, args, project_info)
+                if not work_path_info:
+                    return jsonify({'success': False, 'error': '无法推断工作路径信息'}), 400
+                
+                # 构建 branch 目录路径
+                work_path = Path(work_path_info['work_path']).resolve()
+                project = work_path_info['project']
+                version = work_path_info['version']
+                block = work_path_info['block']
+                user = work_path_info['user']
+                branch = work_path_info['branch']
+                branch_dir = work_path / project / version / block / user / branch
+                
+                runs = load_run_history(branch_dir)
+                
+                # 应用过滤器
+                step_filter = request.args.get('step', None)
+                if step_filter:
+                    runs = filter_history(runs, step_filter=step_filter)
+                
+                # 限制返回数量
+                limit = request.args.get('limit', type=int)
+                if limit:
+                    runs = runs[-limit:]  # 取最近 N 条
+                
+                return jsonify({'success': True, 'data': runs})
+            except Exception as e:
+                import traceback
+                return jsonify({'success': False, 'error': f'{str(e)}\n{traceback.format_exc()}'}), 500
+        
+        @self.app.route('/stats')
+        def stats_page():
+            """性能分析页面"""
+            return render_template('stats.html')
+        
         @self.app.route('/api/workflow/logs/<step_name>', methods=['GET'])
         def get_step_logs(step_name):
             """获取步骤的执行日志"""

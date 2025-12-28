@@ -7,16 +7,6 @@ CLI 命令处理函数
 主入口模块，导出所有命令处理函数。
 """
 
-# 从各个子模块导入函数
-from .config_handler import handle_load_config
-from .script_handler import handle_process_script
-from .workflow_handler import handle_load_workflow, handle_run_workflow
-
-# 向后兼容：导出所有函数
-__all__ = [
-    'handle_load_config',
-    'handle_process_script',
-    'handle_load_workflow',
-    'handle_run_workflow'
-]
+# 已移除 handle_load_workflow，请使用 edp -info 查看流程信息
+__all__ = []
 

@@ -38,7 +38,7 @@ def main():
     # 处理 -branch 命令
     if args.branch:
         manager = create_manager(edp_center_path)
-        from .commands import handle_init_workspace
+        from .commands import handle_create_branch
         
         # 创建一个临时的 args 对象来传递参数
         class BranchArgs:
@@ -54,7 +54,7 @@ def main():
                 self.from_branch_step = args.from_branch_step
         
         branch_args = BranchArgs(args)
-        return handle_init_workspace(manager, branch_args)
+        return handle_create_branch(manager, branch_args)
     
     # 处理 -release 命令
     if args.release:
@@ -99,6 +99,37 @@ def main():
             traceback.print_exc()
             return 1
 
+    # 处理 -stats-web 命令（独立性能分析 Web 服务器）
+    if getattr(args, 'stats_web', False):
+        try:
+            # 检查 Flask 是否安装
+            try:
+                import flask
+            except ImportError:
+                print(f"[ERROR] Flask 未安装", file=sys.stderr)
+                print(f"[INFO] 请安装 Flask: pip install flask", file=sys.stderr)
+                return 1
+            
+            # 创建 manager
+            manager = create_manager(edp_center_path)
+            
+            from .gui.stats_web import run_stats_web
+            stats_port = getattr(args, 'stats_port', 8889)
+            open_browser = not getattr(args, 'no_open_browser', False)
+            
+            run_stats_web(
+                manager=manager,
+                edp_center_path=edp_center_path,
+                port=stats_port,
+                open_browser=open_browser
+            )
+            return 0
+        except Exception as e:
+            print(f"[ERROR] 启动性能分析 Web 服务器失败: {e}", file=sys.stderr)
+            import traceback
+            traceback.print_exc()
+            return 1
+    
     # 处理 -workflow-web 命令（独立 Web 服务器）
     if args.workflow_web:
         try:
@@ -206,13 +237,35 @@ def main():
         graph_args = GraphArgs(args)
         return handle_graph_cmd(manager, graph_args)
     
+    # 处理 -lib 命令
+    if args.lib:
+        try:
+            from .commands.lib_handler import handle_lib_cmd
+            return handle_lib_cmd(args)
+        except ImportError as e:
+            print(f"[ERROR] 导入 Lib 模块失败: {e}", file=sys.stderr)
+            import traceback
+            traceback.print_exc()
+            return 1
+        except Exception as e:
+            print(f"[ERROR] 执行 Lib 命令失败: {e}", file=sys.stderr)
+            import traceback
+            traceback.print_exc()
+            return 1
+    
+    # 处理信息查询相关命令（-info, -history, -stats, -rollback, -validate）
+    from .command_router import route_shortcut_commands
+    result = route_shortcut_commands(args)
+    if result is not None:
+        return result
+    
     # 处理子命令
     result = route_subcommands(args)
     if result is not None:
         return result
     
     # 如果没有提供命令，显示帮助
-    if not args.branch and not args.run and not args.command and not args.graph and not args.workflow_web:
+    if not args.branch and not args.run and not args.command and not args.graph and not args.workflow_web and not args.lib:
         parser.print_help()
         return 1
     

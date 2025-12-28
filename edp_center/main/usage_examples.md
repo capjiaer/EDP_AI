@@ -72,64 +72,27 @@ manager.init_user_workspace(
 
 ## 2. 命令行使用方式
 
-### 初始化用户工作空间
+### 创建分支
 
 ```bash
-# 基本初始化
-edp-main init-workspace \
-  --work-path WORK_PATH \
-  --project dongting \
-  --project-node P85 \
-  --block block1 \
-  --user zhangsan \
-  --branch branch1
+# 自动推断参数（推荐，在 user 目录下运行）
+edp -b branch1
+
+# 显式指定参数
+edp -b branch1 -prj dongting -v P85 --block block1 --user zhangsan
 
 # 从已有分支创建新分支
-edp-main init-workspace \
-  --work-path WORK_PATH \
-  --project dongting \
-  --project-node P85 \
-  --block block1 \
-  --user zhangsan \
-  --branch branch2 \
-  --from-branch-step "branch1:pnr_innovus.init"
+edp -b branch2 --from-branch-step "branch1:pnr_innovus.init"
 ```
 
 ### 加载配置
-
-```bash
-# 加载配置并输出到控制台
-edp-main load-config \
-  --project dongting \
-  --project-node P85 \
-  --flow pv_calibre
-
-# 加载配置并保存到文件
-edp-main load-config \
-  --project dongting \
-  --project-node P85 \
-  --flow pv_calibre \
-  --output config.yaml
-```
-
-### 处理脚本
-
-```bash
-# 处理脚本并输出到控制台
-edp-main process-script \
-  --input edp_center/flow/initialize/SAMSUNG/S8/dongting/cmds/pv_calibre/steps/ipmerge.tcl
-
-# 处理脚本并保存到文件
-edp-main process-script \
-  --input edp_center/flow/initialize/SAMSUNG/S8/dongting/cmds/pv_calibre/steps/ipmerge.tcl \
-  --output output/ipmerge_expanded.tcl
-```
 
 ### 加载工作流
 
 ```bash
 # 加载工作流定义（自动加载所有 flow）
-edp-main load-workflow \
+# 已移除 load-workflow 命令，请使用 edp -info 查看流程信息
+# edp-main load-workflow \
   --project dongting \
   --project-node P85 \
   --flow pv_calibre
@@ -154,53 +117,30 @@ edp-main run \
 ### 场景：运行 pv_calibre 流程
 
 ```bash
-# 步骤 1: 初始化用户工作空间
-edp-main init-workspace \
-  --work-path WORK_PATH \
-  --project dongting \
-  --project-node P85 \
-  --block block1 \
-  --user zhangsan \
-  --branch branch1
+# 步骤 1: 创建分支
+edp -b branch1 -prj dongting -v P85 --block block1 --user zhangsan
 
-# 步骤 2: 执行完整工作流
+# 步骤 2: 执行流程/步骤
 # 这会自动：
 # - 加载所有 flow 的 dependency.yaml
 # - 通过文件匹配自动建立跨 flow 依赖
 # - 处理脚本（展开 #import 指令）
 # - 执行工作流
-edp-main run \
-  --work-path WORK_PATH \
-  --project dongting \
-  --project-node P85 \
-  --block block1 \
-  --user zhangsan \
-  --branch branch1 \
-  --flow pv_calibre
+edp -run pv_calibre.ipmerge
+# 或执行多个步骤
+edp -run -fr pnr_innovus.place -to pv_calibre.drc
 ```
 
 ### 场景：从已有分支创建新分支并运行
 
 ```bash
 # 步骤 1: 从 branch1 的 pnr_innovus.init 创建 branch2
-edp-main init-workspace \
-  --work-path WORK_PATH \
-  --project dongting \
-  --project-node P85 \
-  --block block1 \
-  --user zhangsan \
-  --branch branch2 \
-  --from-branch-step "branch1:pnr_innovus.init"
+edp -b branch2 --from-branch-step "branch1:pnr_innovus.init"
 
 # 步骤 2: 在 branch2 上运行 pv_calibre
-edp-main run \
-  --work-path WORK_PATH \
-  --project dongting \
-  --project-node P85 \
-  --block block1 \
-  --user zhangsan \
-  --branch branch2 \
-  --flow pv_calibre
+edp -run pv_calibre.ipmerge
+# 或执行多个步骤
+edp -run -fr pnr_innovus.place -to pv_calibre.drc
 ```
 
 ## 4. 自动检测 edp_center 路径
@@ -210,7 +150,7 @@ edp-main run \
 ```bash
 # 在项目根目录下运行，会自动检测 edp_center
 cd /path/to/EDP_AI
-edp-main run --work-path WORK_PATH --project dongting ...
+edp -run pv_calibre.ipmerge
 ```
 
 ## 5. 依赖关系说明

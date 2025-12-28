@@ -51,13 +51,13 @@ source ~/.tcshrc
 如果已经安装了 `edp-main` CLI，可以直接使用：
 
 ```bash
-edp-main run --work-path WORK_PATH --project dongting ...
+edp -run pv_calibre.ipmerge
 ```
 
 ### 方式 3: 使用 Python 直接调用
 
 ```bash
-python /path/to/EDP_AI/edp_center/main/edp.py run --work-path WORK_PATH ...
+python -m edp_center.main.cli.cli -run pv_calibre.ipmerge
 ```
 
 ## 使用方式
@@ -66,18 +66,18 @@ python /path/to/EDP_AI/edp_center/main/edp.py run --work-path WORK_PATH ...
 
 ```bash
 # 初始化工作空间
-edp init-workspace --work-path WORK_PATH --project dongting --project-node P85 \
-  --block block1 --user zhangsan --branch branch1
+edp -b branch1 -prj dongting -v P85 --block block1 --user zhangsan
 
-# 执行完整工作流
-edp run --work-path WORK_PATH --project dongting --project-node P85 \
-  --block block1 --user zhangsan --branch branch1 --flow pv_calibre
+# 执行流程/步骤
+edp -run pv_calibre.ipmerge
+# 或执行多个步骤
+edp -run -fr pnr_innovus.place -to pv_calibre.drc
 ```
 
 ### 使用 edp-main（如果已安装）
 
 ```bash
-edp-main run --work-path WORK_PATH --project dongting ...
+edp -run pv_calibre.ipmerge
 ```
 
 ## 自定义 Python 路径

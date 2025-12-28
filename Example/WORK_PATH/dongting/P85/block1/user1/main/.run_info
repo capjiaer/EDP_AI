@@ -7,3 +7,16 @@ runs:
     step: []
     utils: {}
   status: failed
+- timestamp: '2025-12-26 15:55:41'
+  flow: pnr_innovus
+  step: place
+  hooks:
+    step: []
+- timestamp: '2025-12-26 15:58:25'
+  flow: pnr_innovus
+  step: place
+  hooks:
+    step: []
+  status: failed
+  duration: 0.09
+  error: 步骤 pnr_innovus.place 执行失败

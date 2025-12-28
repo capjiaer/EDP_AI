@@ -1,0 +1,52 @@
+# SMIC N7 Node Configuration
+# 节点配置表 - 定义该节点的视图类型和文件模式
+
+# 节点元数据
+node_info:
+  name: "N7"
+  description: "SMIC 7nm Process"
+  supported_lib_types:
+    - STD
+    - IP
+    - MEM
+
+# PVT Corner 映射规则（SMIC使用不同的命名规则）
+pvt_corner_mapping:
+  ffgs: CMINccbest    # fast-fast → best case
+  ssgs: CMAXccworst   # slow-slow → worst case
+  tt: typical         # typical → typical
+
+# 第一张表：定义每个库类型需要哪些视图类型
+standard_view_types:
+  STD:
+    - gds
+    - lef
+    - cdl
+    - lib
+    - db
+  IP:
+    - gds
+    - lef
+    - lib
+    - db
+  MEM:
+    - gds
+    - lef
+    - lib
+    - db
+
+# 第二张表：定义每个视图类型对应的文件匹配模式
+view_file_patterns:
+  gds:
+    - "*.gds"
+  lef:
+    - "*.plef"  # SMIC 使用 .plef
+    - "*.lef"   # 但也可能支持标准 .lef
+  cdl:
+    - "*.cir"   # SMIC 使用 .cir
+    - "*.cdl"   # 但也可能支持标准 .cdl
+  lib:
+    - "*.lib"   # PVT 子目录中的 .lib 文件
+  db:
+    - "*.db"    # PVT 子目录中的 .db 文件
+

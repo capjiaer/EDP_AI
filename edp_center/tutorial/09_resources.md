@@ -17,6 +17,7 @@
 - **edp_configkit API**: `edp_center/docs/api/edp_configkit.md`
 - **edp_cmdkit API**: `edp_center/docs/api/edp_cmdkit.md`
 - **edp_flowkit API**: `edp_center/packages/edp_flowkit/docs/api.md`
+- **edp_libkit API**: `edp_center/packages/edp_libkit/README.md`
 - **edp_common API**: `edp_center/docs/api/edp_common.md`
 
 ### 架构文档
