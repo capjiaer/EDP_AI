@@ -59,7 +59,7 @@ def handle_error(
         def wrapper(*args, **kwargs) -> Any:
             try:
                 return func(*args, **kwargs)
-            except error_type if error_type else Exception as e:
+            except (error_type if error_type else Exception) as e:
                 # 格式化错误消息
                 if error_message:
                     msg = f"{error_message}: {e}"
@@ -122,7 +122,7 @@ def error_context(
     """
     try:
         yield
-    except error_type if error_type else Exception as e:
+    except (error_type if error_type else Exception) as e:
         # 格式化错误消息
         if error_message:
             msg = f"{error_message}: {e}"

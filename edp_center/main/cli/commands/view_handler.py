@@ -13,6 +13,9 @@ import time
 import webbrowser
 import threading
 
+from edp_center.packages.edp_common.error_handler import handle_cli_error
+
+@handle_cli_error(error_message="启动 view 服务失败")
 def handle_view_cmd(args) -> int:
     """
     处理 -view 命令：启动 Web 服务并打开浏览器
@@ -62,7 +65,4 @@ def handle_view_cmd(args) -> int:
     except KeyboardInterrupt:
         print("\n[INFO] 服务已停止", file=sys.stderr)
         return 0
-    except Exception as e:
-        print(f"[ERROR] 启动服务失败: {e}", file=sys.stderr)
-        return 1
 

@@ -11,11 +11,13 @@ import logging
 
 from .run_single_step import execute_single_step
 from .run_range import handle_run_range
+from edp_center.packages.edp_common.error_handler import handle_cli_error
 
 # 获取 logger
 logger = logging.getLogger(__name__)
 
 
+@handle_cli_error(error_message="执行 run 命令失败")
 def handle_run_cmd(manager, args) -> int:
     """
     处理 -run 选项：生成 cmds 文件并执行
@@ -40,29 +42,22 @@ def handle_run_cmd(manager, args) -> int:
     Returns:
         退出代码（0 表示成功，非 0 表示失败）
     """
-    try:
-        # 检查是否使用了 --from 或 --to 参数
-        run_from = getattr(args, 'run_from', None)
-        run_to = getattr(args, 'run_to', None)
-        single_step = getattr(args, 'run', None)
-        
-        # 如果使用了 --from 或 --to，需要执行多个步骤
-        if run_from or run_to:
-            return handle_run_range(manager, args, run_from, run_to, single_step)
-        
-        # 否则执行单个步骤（原有逻辑）
-        if not single_step:
-            print(f"[ERROR] 必须指定 --run、--from、--to 中的至少一个", file=sys.stderr)
-            return 1
-        
-        # 执行单个步骤
-        return execute_single_step(manager, args, single_step)
+    # 检查是否使用了 --from 或 --to 参数
+    run_from = getattr(args, 'run_from', None)
+    run_to = getattr(args, 'run_to', None)
+    single_step = getattr(args, 'run', None)
     
-    except Exception as e:
-        print(f"[ERROR] 执行命令时发生错误: {e}", file=sys.stderr)
-        import traceback
-        traceback.print_exc()
+    # 如果使用了 --from 或 --to，需要执行多个步骤
+    if run_from or run_to:
+        return handle_run_range(manager, args, run_from, run_to, single_step)
+    
+    # 否则执行单个步骤（原有逻辑）
+    if not single_step:
+        print(f"[ERROR] 必须指定 --run、--from、--to 中的至少一个", file=sys.stderr)
         return 1
+    
+    # 执行单个步骤
+    return execute_single_step(manager, args, single_step)
 
 
 

@@ -253,21 +253,127 @@ ls -lt logs/pnr_innovus.place/old_logs/edp_run_*.log | head -5
 - 便于对比多次运行的结果，追踪问题变化
 - 历史日志自动归档到 `old_logs/` 目录，保持主目录整洁
 
-### 4. 查看信息 (`edp_info -info`)
+### 4. 查看信息 (`edp -info` / `edp_info -info`)
 
 查看可用的流程和步骤：
 
 ```bash
-# 查看所有流程
-edp_info -info
+# 查看所有流程（统一使用 edp 命令）
+edp -info
 # 或使用短别名
-edp_info -i
+edp -i
 
 # 查看指定流程的步骤
-edp_info -info pv_calibre
+edp -info pv_calibre
 # 或使用短别名
+edp -i pv_calibre
+
+# 也可以使用 edp_info 命令（功能相同）
+edp_info -info
 edp_info -i pv_calibre
 ```
+
+### 4.1. 查看历史记录 (`edp -history`)
+
+查看运行历史记录：
+
+```bash
+# 查看所有历史记录
+edp -history
+
+# 查看指定步骤的历史记录
+edp -history pnr_innovus.place
+
+# 限制显示数量
+edp -history --limit 10
+
+# 过滤状态
+edp -history --status success    # 只显示成功的记录
+edp -history --status failed     # 只显示失败的记录
+
+# 按时间范围过滤
+edp -history --from-date 2025-01-01 --to-date 2025-01-31
+```
+
+**说明**：
+- 历史记录存储在 `.run_info` 文件中
+- 显示每次运行的详细信息：时间戳、状态、持续时间、资源使用等
+- 支持按步骤、状态、时间范围过滤
+
+### 4.2. 性能统计 (`edp -stats`)
+
+查看性能统计信息：
+
+```bash
+# 查看所有步骤的统计
+edp -stats
+
+# 查看指定步骤的统计
+edp -stats pnr_innovus.place
+
+# 显示性能趋势
+edp -stats --trend
+
+# 导出统计报告
+edp -stats --export report.html
+```
+
+**说明**：
+- 统计信息包括：平均执行时间、CPU 使用率、内存使用、成功率等
+- 支持按步骤分组统计
+- 可以显示性能趋势，帮助识别性能问题
+
+### 4.3. 配置对比和回滚 (`edp -rollback`)
+
+对比不同运行的配置差异，帮助定位问题：
+
+```bash
+# 对比最后一次成功和最后一次失败（默认）
+edp -rollback
+
+# 对比指定步骤的最后一次成功和最后一次失败
+edp -rollback pnr_innovus.place
+
+# 对比指定索引的运行
+edp -rollback --compare-index 1 3
+
+# 预览模式（不实际回滚）
+edp -rollback --preview
+# 或
+edp -rollback --rollback-dry-run
+
+# 对比不同分支的配置
+edp -rollback --compare-branch main
+```
+
+**说明**：
+- 对比两次运行的 `full.tcl` 配置差异
+- 显示新增、删除、修改的配置变量
+- 帮助快速定位配置变化导致的问题
+- 每次运行都会自动备份 `full.tcl` 到 `runs/{flow}.{step}/backups/` 目录
+
+### 4.4. 验证执行结果 (`edp -validate`)
+
+验证执行结果和生成验证报告：
+
+```bash
+# 验证最后一次执行
+edp -validate
+
+# 验证指定步骤的执行
+edp -validate pnr_innovus.place
+
+# Timing Compare（对比两个分支的结果）
+edp -validate --timing-compare branch1 branch2
+
+# 生成验证报告
+edp -validate --report
+```
+
+**说明**：
+- 验证执行结果的完整性和正确性
+- 支持 Timing Compare 功能，对比不同分支的结果
+- 可以生成详细的验证报告
 
 ### 5. 创建项目结构 (`edp_init -create-project`)
 

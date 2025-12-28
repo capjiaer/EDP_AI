@@ -15,11 +15,11 @@ from io import TextIOWrapper
 from datetime import datetime
 
 from ..utils import (
-    infer_project_info, infer_work_path_info,
+    infer_and_validate_project_info, infer_work_path_info,
     find_source_script,
     generate_full_tcl, list_available_flows,
     get_cmd_filename_from_dependency,
-    validate_work_path_info
+    validate_work_path_info, get_current_dir, build_branch_dir
 )
 from .common_handlers import show_project_list
 from .run_helpers import (
@@ -59,19 +59,14 @@ def execute_single_step(manager, args, flow_step: str) -> int:
         step_name = parts[1]
         
         # 获取当前工作目录
-        current_dir = Path.cwd().resolve()
+        current_dir = get_current_dir()
         
         # 推断项目信息（从当前目录或 .edp_version 文件）
-        project_info = infer_project_info(manager, current_dir, args)
+        project_info = infer_and_validate_project_info(manager, current_dir, args)
         if not project_info:
-            print(f"[ERROR] 无法推断项目信息，请确保在正确的工作目录下运行", file=sys.stderr)
-            print(f"[INFO] 或者手动指定: --edp-center, --project, --foundry, --node", file=sys.stderr)
-            
             logger.error("无法推断项目信息", extra={'current_dir': str(current_dir)})
-            
             # 显示支持的 project 列表
             show_project_list(manager, current_dir, args)
-            
             return 1
         
         edp_center_path = project_info['edp_center_path']
@@ -170,37 +165,45 @@ def execute_single_step(manager, args, flow_step: str) -> int:
             print(f"[INFO] 请确保在正确的目录下运行，或手动指定缺失的参数", file=sys.stderr)
             return 1
         
+        # ==================== 步骤1: 生成 full.tcl 文件并创建配置快照 ====================
+        # 执行流程说明：
+        # 1. 生成新的 full.tcl（用于本次实际执行）
+        # 2. 立即备份这个新生成的 full.tcl（这是本次运行的配置快照）
+        # 3. 记录备份路径到 .run_info
+        #
+        # 优势：
+        # - 每次运行都是独立的，不依赖之前的运行
+        # - 即使后续运行覆盖了 full.tcl，也能找到本次运行的配置
+        # - 逻辑简单清晰：生成 → 备份 → 记录
+        #
+        # 例如：
+        # - 第1次运行：生成 full.tcl → 备份 → 记录备份路径
+        # - 第2次运行：生成新的 full.tcl → 备份 → 记录备份路径（独立于第1次）
+        # - 第3次运行：生成新的 full.tcl → 备份 → 记录备份路径（独立于前两次）
         # 生成 full.tcl 文件
-        try:
-            full_tcl_path = generate_full_tcl(
-                edp_center_path, foundry, node, project,
-                work_path_info, flow_name, step_name, current_dir=current_dir
-            )
-        except ValueError as e:
-            # 变量格式验证失败，直接返回错误码
-            # 错误信息已经在 generate_full_tcl 中输出了
-            return 1
+        # 重要：generate_full_tcl 会在生成新文件后自动备份新生成的 full.tcl
+        # 如果生成失败，会抛出异常（由 @handle_cli_error 统一处理）
+        full_tcl_path, backup_path = generate_full_tcl(
+            edp_center_path, foundry, node, project,
+            work_path_info, flow_name, step_name, current_dir=current_dir
+        )
         
-        if not full_tcl_path:
-            # full.tcl 生成失败（可能是其他错误）
-            print(f"[ERROR] 无法生成 full.tcl，请检查错误信息并修复问题", file=sys.stderr)
-            return 1
+        print(f"[INFO] 已生成 full.tcl（用于执行）: {full_tcl_path}", file=sys.stderr)
         
-        print(f"[INFO] 已生成 full.tcl: {full_tcl_path}", file=sys.stderr)
+        # 确定要记录到 .run_info 的配置文件路径
+        # 原则：记录备份文件的路径（如果存在），否则记录当前 full.tcl 的路径
+        # 这样每次运行都有对应的配置快照，可以用于后续的配置对比
+        recorded_tcl_path = backup_path if backup_path else full_tcl_path
+        if backup_path:
+            print(f"[INFO] 已创建配置快照: {backup_path}", file=sys.stderr)
+        else:
+            print(f"[INFO] 配置将记录为: {full_tcl_path}", file=sys.stderr)
         
         # 确定 branch 目录路径（用于创建 cmds 和 hooks 目录）
         if work_path_info and work_path_info.get('work_path') and work_path_info.get('project') and \
            work_path_info.get('version') and work_path_info.get('block') and \
            work_path_info.get('user') and work_path_info.get('branch'):
-            work_path = Path(work_path_info['work_path']).resolve()
-            project = work_path_info['project']
-            version = work_path_info.get('version')
-            block = work_path_info['block']
-            user = work_path_info['user']
-            branch = work_path_info['branch']
-            
-            # 构建 branch 目录路径
-            branch_dir = work_path / project / version / block / user / branch
+            branch_dir = build_branch_dir(work_path_info)
         else:
             # 如果无法推断 branch 目录，抛出异常
             raise ValueError(
@@ -390,9 +393,13 @@ def execute_single_step(manager, args, flow_step: str) -> int:
                     # 获取实际使用的 hooks
                     used_hooks = get_used_hooks(hooks_dir, step_name)
                     
-                    # 更新 .run_info 文件（包含执行信息）
+                    # 更新 .run_info 文件（包含执行信息和 full.tcl 路径）
                     # step 对象现在包含 execution_info（由 ICCommandExecutor.run_cmd 设置）
-                    update_run_info(branch_dir, flow_name, step_name, used_hooks, step=step)
+                    # 记录本次运行对应的配置文件路径：
+                    # - 如果存在备份文件，记录备份文件的路径（本次运行使用的配置）
+                    # - 如果没有备份（第一次运行），记录当前 full.tcl 的路径
+                    # 这样每次运行都有对应的配置快照，即使运行失败也能找到对应的配置
+                    update_run_info(branch_dir, flow_name, step_name, used_hooks, step=step, full_tcl_path=recorded_tcl_path)
                 
                 if success:
                     log_and_print(f"[OK] 执行成功: {step_full_name}")

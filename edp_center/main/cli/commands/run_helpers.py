@@ -54,7 +54,7 @@ def get_used_hooks(hooks_dir: Path, step_name: str) -> Dict[str, List[str]]:
     return used_hooks
 
 
-def update_run_info(branch_dir: Path, flow_name: str, step_name: str, used_hooks: Dict, step=None) -> None:
+def update_run_info(branch_dir: Path, flow_name: str, step_name: str, used_hooks: Dict, step=None, full_tcl_path: Optional[Path] = None) -> None:
     """
     更新 .run_info 文件，记录运行信息
     
@@ -65,6 +65,7 @@ def update_run_info(branch_dir: Path, flow_name: str, step_name: str, used_hooks
         used_hooks: 使用的 hooks 信息字典
         utils: 使用的 util 名称列表（可选）
         step: 步骤对象（可选），用于获取执行信息（execution_info）
+        full_tcl_path: full.tcl 文件路径（可选），用于记录配置信息
     """
     run_info_file = branch_dir / '.run_info'
     
@@ -144,6 +145,22 @@ def update_run_info(branch_dir: Path, flow_name: str, step_name: str, used_hooks
         # 错误信息
         if exec_info.get('error'):
             new_run['error'] = exec_info.get('error')
+    
+    # 记录 full.tcl 路径（相对于 branch_dir）
+    if full_tcl_path:
+        try:
+            # 将 full_tcl_path 转换为相对于 branch_dir 的路径
+            full_tcl_path_resolved = Path(full_tcl_path).resolve()
+            branch_dir_resolved = branch_dir.resolve()
+            try:
+                relative_path = full_tcl_path_resolved.relative_to(branch_dir_resolved)
+                new_run['full_tcl_path'] = str(relative_path).replace('\\', '/')  # 统一使用正斜杠
+            except ValueError:
+                # 如果无法转换为相对路径，使用绝对路径
+                new_run['full_tcl_path'] = str(full_tcl_path_resolved)
+        except Exception as e:
+            # 如果路径处理失败，记录警告但继续
+            print(f"[WARN] 无法处理 full.tcl 路径: {e}", file=sys.stderr)
     
     # 追加到历史记录
     run_history.append(new_run)

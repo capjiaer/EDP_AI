@@ -10,6 +10,8 @@ import shutil
 from pathlib import Path
 from typing import Optional
 
+from edp_center.packages.edp_common.error_handler import handle_cli_error
+
 
 def copy_directory_structure(source: Path, target: Path, exclude_patterns: Optional[list] = None) -> None:
     """
@@ -100,98 +102,91 @@ def create_project_structure(edp_center_path: Path, project_name: str, foundry: 
     Returns:
         退出代码（0 表示成功，非 0 表示失败）
     """
-    try:
-        edp_center = Path(edp_center_path).resolve()
-        
-        if not edp_center.exists():
-            print(f"[ERROR] EDP Center 路径不存在: {edp_center}", file=sys.stderr)
-            return 1
-        
-        # 1. 创建 flow/initialize/{foundry}/{node}/ 下的结构
-        flow_initialize_base = edp_center / "flow" / "initialize" / foundry / node
-        flow_initialize_base.mkdir(parents=True, exist_ok=True)
-        
-        # 检查目标 node 下是否有 common，如果没有，从模板复制
-        common_flow_dir = flow_initialize_base / "common"
-        if not common_flow_dir.exists():
-            # 从模板 foundry_name/node_name/common 复制到目标 node 的 common
-            template_common_dir = edp_center / "flow" / "initialize" / "foundry_name" / "node_name" / "common"
-            if template_common_dir.exists():
-                print(f"[INFO] 目标 node 下没有 common，正在从模板复制 common...")
-                copy_directory_with_files(template_common_dir, common_flow_dir, skip_existing=True)
-                print(f"[OK] 已创建 flow/initialize/{foundry}/{node}/common/")
-            else:
-                print(f"[ERROR] 模板 common 目录不存在: {template_common_dir}", file=sys.stderr)
-                return 1
-        
-        # 从模板 prj_example 复制到新项目
-        template_prj_example_dir = edp_center / "flow" / "initialize" / "foundry_name" / "node_name" / "prj_example"
-        if not template_prj_example_dir.exists():
-            print(f"[ERROR] 模板 prj_example 目录不存在: {template_prj_example_dir}", file=sys.stderr)
-            return 1
-        
-        source_flow_dir = template_prj_example_dir
-        source_name = "prj_example"
-        
-        # 创建项目目录（如果已存在，只创建缺失的内容，不覆盖已有文件）
-        project_flow_dir = flow_initialize_base / project_name
-        if project_flow_dir.exists():
-            print(f"[INFO] 项目目录已存在，将补充缺失的目录和文件（已存在的文件不会覆盖）...")
-        else:
-            print(f"[INFO] 正在从 {source_name} 创建 flow/initialize/{foundry}/{node}/{project_name}/...")
-        copy_directory_with_files(source_flow_dir, project_flow_dir, skip_existing=True)
-        print(f"[OK] 已创建 flow/initialize/{foundry}/{node}/{project_name}/")
-        
-        # 2. 创建 config/{foundry}/{node}/ 下的结构
-        config_base = edp_center / "config" / foundry
-        config_base.mkdir(parents=True, exist_ok=True)
-        
-        config_node_dir = config_base / node
-        config_node_dir.mkdir(parents=True, exist_ok=True)
-        
-        # 检查目标 node 下是否有 common，如果没有，从模板复制
-        common_config_dir = config_node_dir / "common"
-        if not common_config_dir.exists():
-            # 从模板 foundry_name/node_name/common 复制到目标 node 的 common
-            template_common_config_dir = edp_center / "config" / "foundry_name" / "node_name" / "common"
-            if template_common_config_dir.exists():
-                print(f"[INFO] 目标 node 下没有 common，正在从模板复制 common...")
-                copy_directory_with_files(template_common_config_dir, common_config_dir, skip_existing=True)
-                print(f"[OK] 已创建 config/{foundry}/{node}/common/")
-            else:
-                print(f"[ERROR] 模板 common 目录不存在: {template_common_config_dir}", file=sys.stderr)
-                return 1
-        
-        # 从模板 prj_example 复制到新项目
-        template_prj_example_config_dir = edp_center / "config" / "foundry_name" / "node_name" / "prj_example"
-        if not template_prj_example_config_dir.exists():
-            print(f"[ERROR] 模板 prj_example 目录不存在: {template_prj_example_config_dir}", file=sys.stderr)
-            return 1
-        
-        source_config_dir = template_prj_example_config_dir
-        source_name = "prj_example"
-        
-        # 创建项目目录（如果已存在，只创建缺失的内容，不覆盖已有文件）
-        project_config_dir = config_node_dir / project_name
-        if project_config_dir.exists():
-            print(f"[INFO] 项目配置目录已存在，将补充缺失的目录和文件（已存在的文件不会覆盖）...")
-        else:
-            print(f"[INFO] 正在从 {source_name} 创建 config/{foundry}/{node}/{project_name}/...")
-        copy_directory_with_files(source_config_dir, project_config_dir, skip_existing=True)
-        print(f"[OK] 已创建 config/{foundry}/{node}/{project_name}/")
-        
-        print(f"\n[OK] 项目 '{project_name}' 的文件夹结构已创建完成！")
-        print(f"  - flow/initialize/{foundry}/{node}/{project_name}/")
-        print(f"  - config/{foundry}/{node}/{project_name}/")
-        print(f"\n[INFO] 现在可以在这些目录中填写项目特定的内容了。")
-        
-        return 0
-        
-    except Exception as e:
-        print(f"[ERROR] 创建项目结构失败: {e}", file=sys.stderr)
-        import traceback
-        traceback.print_exc()
+    edp_center = Path(edp_center_path).resolve()
+    
+    if not edp_center.exists():
+        print(f"[ERROR] EDP Center 路径不存在: {edp_center}", file=sys.stderr)
         return 1
+    
+    # 1. 创建 flow/initialize/{foundry}/{node}/ 下的结构
+    flow_initialize_base = edp_center / "flow" / "initialize" / foundry / node
+    flow_initialize_base.mkdir(parents=True, exist_ok=True)
+    
+    # 检查目标 node 下是否有 common，如果没有，从模板复制
+    common_flow_dir = flow_initialize_base / "common"
+    if not common_flow_dir.exists():
+        # 从模板 foundry_name/node_name/common 复制到目标 node 的 common
+        template_common_dir = edp_center / "flow" / "initialize" / "foundry_name" / "node_name" / "common"
+        if template_common_dir.exists():
+            print(f"[INFO] 目标 node 下没有 common，正在从模板复制 common...")
+            copy_directory_with_files(template_common_dir, common_flow_dir, skip_existing=True)
+            print(f"[OK] 已创建 flow/initialize/{foundry}/{node}/common/")
+        else:
+            print(f"[ERROR] 模板 common 目录不存在: {template_common_dir}", file=sys.stderr)
+            return 1
+    
+    # 从模板 prj_example 复制到新项目
+    template_prj_example_dir = edp_center / "flow" / "initialize" / "foundry_name" / "node_name" / "prj_example"
+    if not template_prj_example_dir.exists():
+        print(f"[ERROR] 模板 prj_example 目录不存在: {template_prj_example_dir}", file=sys.stderr)
+        return 1
+    
+    source_flow_dir = template_prj_example_dir
+    source_name = "prj_example"
+    
+    # 创建项目目录（如果已存在，只创建缺失的内容，不覆盖已有文件）
+    project_flow_dir = flow_initialize_base / project_name
+    if project_flow_dir.exists():
+        print(f"[INFO] 项目目录已存在，将补充缺失的目录和文件（已存在的文件不会覆盖）...")
+    else:
+        print(f"[INFO] 正在从 {source_name} 创建 flow/initialize/{foundry}/{node}/{project_name}/...")
+    copy_directory_with_files(source_flow_dir, project_flow_dir, skip_existing=True)
+    print(f"[OK] 已创建 flow/initialize/{foundry}/{node}/{project_name}/")
+    
+    # 2. 创建 config/{foundry}/{node}/ 下的结构
+    config_base = edp_center / "config" / foundry
+    config_base.mkdir(parents=True, exist_ok=True)
+    
+    config_node_dir = config_base / node
+    config_node_dir.mkdir(parents=True, exist_ok=True)
+    
+    # 检查目标 node 下是否有 common，如果没有，从模板复制
+    common_config_dir = config_node_dir / "common"
+    if not common_config_dir.exists():
+        # 从模板 foundry_name/node_name/common 复制到目标 node 的 common
+        template_common_config_dir = edp_center / "config" / "foundry_name" / "node_name" / "common"
+        if template_common_config_dir.exists():
+            print(f"[INFO] 目标 node 下没有 common，正在从模板复制 common...")
+            copy_directory_with_files(template_common_config_dir, common_config_dir, skip_existing=True)
+            print(f"[OK] 已创建 config/{foundry}/{node}/common/")
+        else:
+            print(f"[ERROR] 模板 common 目录不存在: {template_common_config_dir}", file=sys.stderr)
+            return 1
+    
+    # 从模板 prj_example 复制到新项目
+    template_prj_example_config_dir = edp_center / "config" / "foundry_name" / "node_name" / "prj_example"
+    if not template_prj_example_config_dir.exists():
+        print(f"[ERROR] 模板 prj_example 目录不存在: {template_prj_example_config_dir}", file=sys.stderr)
+        return 1
+    
+    source_config_dir = template_prj_example_config_dir
+    source_name = "prj_example"
+    
+    # 创建项目目录（如果已存在，只创建缺失的内容，不覆盖已有文件）
+    project_config_dir = config_node_dir / project_name
+    if project_config_dir.exists():
+        print(f"[INFO] 项目配置目录已存在，将补充缺失的目录和文件（已存在的文件不会覆盖）...")
+    else:
+        print(f"[INFO] 正在从 {source_name} 创建 config/{foundry}/{node}/{project_name}/...")
+    copy_directory_with_files(source_config_dir, project_config_dir, skip_existing=True)
+    print(f"[OK] 已创建 config/{foundry}/{node}/{project_name}/")
+    
+    print(f"\n[OK] 项目 '{project_name}' 的文件夹结构已创建完成！")
+    print(f"  - flow/initialize/{foundry}/{node}/{project_name}/")
+    print(f"  - config/{foundry}/{node}/{project_name}/")
+    print(f"\n[INFO] 现在可以在这些目录中填写项目特定的内容了。")
+    
+    return 0
 
 
 def handle_create_project(edp_center_path: Path, args) -> int:

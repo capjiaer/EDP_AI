@@ -74,13 +74,17 @@ def main():
             print(f"错误: 无法导入性能分析处理器: {e}", file=sys.stderr)
             return 1
     
-    # 处理 -rollback 命令（待实现）
+    # 处理 -rollback 命令
     # 需要检查命令行参数，因为 nargs='?' 时 None 也可能表示提供了选项
     has_rollback = any(arg in ('-rollback', '--rollback') for arg in sys.argv)
     if has_rollback:
-        # TODO: 实现回滚功能
-        print("⚠️  回滚功能正在开发中，敬请期待", file=sys.stderr)
-        return 0
+        manager = create_manager(edp_center_path)
+        try:
+            from .commands.rollback_handler import handle_rollback_cmd
+            return handle_rollback_cmd(manager, args)
+        except ImportError as e:
+            print(f"错误: 无法导入回滚处理器: {e}", file=sys.stderr)
+            return 1
     
     # 处理 -validate 命令（待实现）
     # 需要检查命令行参数，因为 nargs='?' 时 None 也可能表示提供了选项

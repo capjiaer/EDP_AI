@@ -46,11 +46,11 @@ class EDPError(Exception):
         if self.context:
             context_str = self._format_context(self.context)
             if context_str:
-                parts.append(f"\n📋 详细信息:\n{context_str}")
+                parts.append(f"\n[详细信息]\n{context_str}")
         
         # 添加解决建议
         if self.suggestion:
-            parts.append(f"\n💡 建议:\n{self.suggestion}")
+            parts.append(f"\n[建议]\n{self.suggestion}")
         
         return "\n".join(parts)
     

@@ -11,6 +11,8 @@ import logging
 from pathlib import Path
 from typing import List, Optional
 
+from edp_center.packages.edp_common.error_handler import handle_cli_error
+
 logger = logging.getLogger(__name__)
 
 
@@ -80,6 +82,7 @@ def _find_library_directories(parent_path: Path, adapter, lib_type: str) -> List
     return sorted(library_dirs)
 
 
+@handle_cli_error(error_message="执行 lib 命令失败")
 def handle_lib_cmd(args) -> int:
     """
     处理 -lib 命令
@@ -92,19 +95,9 @@ def handle_lib_cmd(args) -> int:
     """
     # 如果指定了 GUI 模式，启动图形界面
     if args.lib_gui:
-        try:
-            from edp_center.packages.edp_libkit.gui import main as gui_main
-            gui_main()
-            return 0
-        except ImportError as e:
-            print(f"[ERROR] 无法导入 GUI 模块: {e}", file=sys.stderr)
-            print("[INFO] 请确保 edp_libkit 已正确安装", file=sys.stderr)
-            return 1
-        except Exception as e:
-            print(f"[ERROR] 启动 GUI 失败: {e}", file=sys.stderr)
-            import traceback
-            traceback.print_exc()
-            return 1
+        from edp_center.packages.edp_libkit.gui import main as gui_main
+        gui_main()
+        return 0
     
     # 检查必需参数
     if not args.lib_path and not args.lib_paths_file:

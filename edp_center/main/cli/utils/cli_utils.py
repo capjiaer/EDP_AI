@@ -8,6 +8,7 @@ CLI 工具函数
 import os
 import stat
 from pathlib import Path
+from edp_center.packages.edp_common.error_handler import safe_call
 
 # 从 edp_dirkit 导入 get_current_user，避免重复实现
 try:
@@ -88,9 +89,15 @@ def set_user_directory_permissions(user_path: Path, username: str) -> bool:
         return True
     except ImportError:
         # 如果没有 pwd 或 grp 模块（Windows），跳过
-        print(f"⚠️  无法设置权限（缺少 pwd/grp 模块），请手动设置 {user_path} 的权限", file=os.sys.stderr)
+        # 这是预期的行为，不需要记录错误
         return False
     except Exception as e:
-        print(f"⚠️  设置权限失败: {e}", file=os.sys.stderr)
+        # 使用 safe_call 统一处理错误（静默失败，返回 False）
+        safe_call(
+            lambda: None,  # 占位函数
+            error_message=f"设置权限失败: {e}",
+            default_return=None,
+            log_error=True
+        )
         return False
 

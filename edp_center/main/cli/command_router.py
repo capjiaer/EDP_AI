@@ -191,9 +191,8 @@ def route_shortcut_commands(args) -> int:
             from .commands.stats_handler import handle_stats_cmd
             return handle_stats_cmd(manager, args)
         elif has_rollback:
-            # TODO: 实现回滚功能
-            print("⚠️  回滚功能正在开发中，敬请期待", file=sys.stderr)
-            return 0
+            from .commands.rollback_handler import handle_rollback_cmd
+            return handle_rollback_cmd(manager, args)
         elif has_validate:
             # TODO: 实现结果验证功能
             print("⚠️  结果验证功能正在开发中，敬请期待", file=sys.stderr)

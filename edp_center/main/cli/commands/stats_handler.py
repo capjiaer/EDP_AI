@@ -7,13 +7,16 @@
 """
 
 import sys
+import json
+import csv
 from pathlib import Path
 from datetime import datetime
 from typing import List, Dict, Optional, Any, Tuple
 from collections import defaultdict
 
-from ..utils import infer_work_path_info, infer_project_info
+from ..utils import infer_all_info, build_branch_dir
 from .history_handler import load_run_history, filter_history
+from edp_center.packages.edp_common.error_handler import handle_cli_error
 
 
 def calculate_stats(runs: List[Dict[str, Any]]) -> Dict[str, Any]:
@@ -248,6 +251,127 @@ def display_stats_cli(runs: List[Dict[str, Any]], step_filter: Optional[str] = N
                 print(f"  - 最近平均时长: {format_duration(recent_avg)} ({trend})", file=sys.stderr)
 
 
+def export_stats(runs: List[Dict[str, Any]], output_path: str, step_filter: Optional[str] = None, show_trend: bool = False):
+    """
+    导出统计信息到文件
+    
+    Args:
+        runs: 运行历史记录列表
+        output_path: 输出文件路径（支持 .csv, .json 格式）
+        step_filter: 步骤过滤器
+        show_trend: 是否显示趋势
+    """
+    output_file = Path(output_path)
+    file_ext = output_file.suffix.lower()
+    
+    # 计算统计数据
+    overall_stats = calculate_stats(runs)
+    step_stats = calculate_step_stats(runs) if not step_filter else {}
+    
+    # 准备导出数据
+    export_data = {
+        'summary': {
+            'total_runs': overall_stats['total_runs'],
+            'success_count': overall_stats['success_count'],
+            'failed_count': overall_stats['failed_count'],
+            'unknown_count': overall_stats['unknown_count'],
+            'success_rate': round(overall_stats['success_rate'], 2),
+            'avg_duration': overall_stats['avg_duration'],
+            'min_duration': overall_stats['min_duration'],
+            'max_duration': overall_stats['max_duration'],
+            'total_duration': overall_stats['total_duration'],
+            'avg_cpu': overall_stats['avg_cpu'],
+            'avg_memory': overall_stats['avg_memory']
+        },
+        'step_stats': {
+            step_name: {
+                'total_runs': stats['total_runs'],
+                'success_count': stats['success_count'],
+                'failed_count': stats['failed_count'],
+                'success_rate': round(stats['success_rate'], 2),
+                'avg_duration': stats['avg_duration'],
+                'min_duration': stats['min_duration'],
+                'max_duration': stats['max_duration']
+            }
+            for step_name, stats in step_stats.items()
+        },
+        'runs': runs
+    }
+    
+    # 根据文件扩展名选择导出格式
+    if file_ext == '.json':
+        export_json(export_data, output_file)
+    elif file_ext == '.csv':
+        export_csv(export_data, output_file)
+    else:
+        # 默认使用 JSON 格式
+        output_file = output_file.with_suffix('.json')
+        export_json(export_data, output_file)
+        print(f"[WARN] 未识别的文件格式，已导出为 JSON: {output_file}", file=sys.stderr)
+
+
+def export_json(data: Dict[str, Any], output_file: Path):
+    """导出为 JSON 格式"""
+    with open(output_file, 'w', encoding='utf-8') as f:
+        json.dump(data, f, ensure_ascii=False, indent=2, default=str)
+
+
+def export_csv(data: Dict[str, Any], output_file: Path):
+    """导出为 CSV 格式"""
+    with open(output_file, 'w', newline='', encoding='utf-8') as f:
+        writer = csv.writer(f)
+        
+        # 写入汇总信息
+        writer.writerow(['统计类型', '指标', '值'])
+        writer.writerow(['汇总', '总执行次数', data['summary']['total_runs']])
+        writer.writerow(['汇总', '成功次数', data['summary']['success_count']])
+        writer.writerow(['汇总', '失败次数', data['summary']['failed_count']])
+        writer.writerow(['汇总', '成功率(%)', data['summary']['success_rate']])
+        writer.writerow(['汇总', '平均时长(秒)', data['summary']['avg_duration']])
+        writer.writerow(['汇总', '最短时长(秒)', data['summary']['min_duration']])
+        writer.writerow(['汇总', '最长时长(秒)', data['summary']['max_duration']])
+        writer.writerow(['汇总', '总时长(秒)', data['summary']['total_duration']])
+        if data['summary']['avg_cpu'] is not None:
+            writer.writerow(['汇总', '平均CPU(核)', data['summary']['avg_cpu']])
+        if data['summary']['avg_memory'] is not None:
+            writer.writerow(['汇总', '平均内存(MB)', data['summary']['avg_memory']])
+        
+        writer.writerow([])  # 空行
+        
+        # 写入步骤统计
+        if data['step_stats']:
+            writer.writerow(['步骤统计'])
+            writer.writerow(['步骤', '执行次数', '成功次数', '失败次数', '成功率(%)', '平均时长(秒)', '最短时长(秒)', '最长时长(秒)'])
+            for step_name, stats in data['step_stats'].items():
+                writer.writerow([
+                    step_name,
+                    stats['total_runs'],
+                    stats['success_count'],
+                    stats['failed_count'],
+                    stats['success_rate'],
+                    stats['avg_duration'],
+                    stats['min_duration'],
+                    stats['max_duration']
+                ])
+            
+            writer.writerow([])  # 空行
+        
+        # 写入详细运行记录
+        writer.writerow(['详细运行记录'])
+        writer.writerow(['时间戳', '流程', '步骤', '状态', '时长(秒)', 'CPU(核)', '内存(MB)'])
+        for run in data['runs']:
+            resources = run.get('resources', {})
+            writer.writerow([
+                run.get('timestamp', ''),
+                run.get('flow', ''),
+                run.get('step', ''),
+                run.get('status', ''),
+                run.get('duration', ''),
+                resources.get('cpu_used', ''),
+                resources.get('peak_memory', '')
+            ])
+
+
 def handle_stats_cmd(manager, args) -> int:
     """
     处理 -stats 命令
@@ -259,38 +383,10 @@ def handle_stats_cmd(manager, args) -> int:
     Returns:
         退出代码（0 表示成功，非 0 表示失败）
     """
-    try:
-        # 获取当前工作目录
-        current_dir = Path.cwd().resolve()
-        
-        # 推断项目信息
-        project_info = infer_project_info(manager, current_dir, args)
-        if not project_info:
-            print(f"[ERROR] 无法推断项目信息，请确保在正确的工作目录下运行", file=sys.stderr)
-            print(f"[INFO] 或者手动指定: --edp-center, --project, --foundry, --node", file=sys.stderr)
-            return 1
-        
-        # 推断工作路径信息
-        work_path_info = infer_work_path_info(current_dir, args, project_info)
-        if not work_path_info or not work_path_info.get('work_path') or \
-           not work_path_info.get('project') or not work_path_info.get('version') or \
-           not work_path_info.get('block') or not work_path_info.get('user') or \
-           not work_path_info.get('branch'):
-            print(f"[ERROR] 无法推断工作路径信息，请确保在正确的工作目录下运行", file=sys.stderr)
-            print(f"[INFO] 或者手动指定: --work-path, --project, --version, --block, --user, --branch", file=sys.stderr)
-            return 1
-    except Exception as e:
-        print(f"[ERROR] 推断工作路径信息时出错: {e}", file=sys.stderr)
+    # 推断所有信息（项目信息、工作路径信息、branch 目录）
+    project_info, work_path_info, branch_dir = infer_all_info(manager, args)
+    if not project_info or not work_path_info or not branch_dir:
         return 1
-    
-    # 构建 branch 目录路径
-    work_path = Path(work_path_info['work_path']).resolve()
-    project = work_path_info['project']
-    version = work_path_info['version']
-    block = work_path_info['block']
-    user = work_path_info['user']
-    branch = work_path_info['branch']
-    branch_dir = work_path / project / version / block / user / branch
     
     if not branch_dir.exists():
         print(f"[ERROR] 分支目录不存在: {branch_dir}", file=sys.stderr)
@@ -329,8 +425,12 @@ def handle_stats_cmd(manager, args) -> int:
     # 导出功能（如果指定）
     export_file = getattr(args, 'export', None)
     if export_file:
-        # TODO: 实现导出功能
-        print(f"[INFO] 导出功能正在开发中，目标文件: {export_file}", file=sys.stderr)
+        try:
+            export_stats(runs, export_file, step_filter=step_filter, show_trend=show_trend)
+            print(f"[OK] 统计信息已导出到: {export_file}", file=sys.stderr)
+        except Exception as e:
+            print(f"[ERROR] 导出失败: {e}", file=sys.stderr)
+            return 1
     
     return 0
 

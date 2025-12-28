@@ -14,6 +14,7 @@ import platform
 from pathlib import Path
 
 from .tutorial_html_generator import generate_tutorial_html
+from edp_center.packages.edp_common.error_handler import handle_cli_error
 
 
 def open_tutorial_in_browser(edp_center_path: Path, update: bool = False, force: bool = False, browser: str = None):
@@ -30,32 +31,32 @@ def open_tutorial_in_browser(edp_center_path: Path, update: bool = False, force:
     
     # 如果需要更新，生成 HTML
     if update:
-        print("📝 正在更新教程 HTML 文件...")
+        print("[INFO] Updating tutorial HTML files...")
         html_file = generate_tutorial_html(edp_center_path, output_dir=None, force=force)
         # 验证文件是否真的存在
         if not html_file.exists():
             raise FileNotFoundError(
-                f"HTML 文件生成失败，文件不存在: {html_file}\n"
-                f"输出目录: {html_file.parent}\n"
-                f"请检查：\n"
-                f"  1. edp_center/tutorial/ 目录是否有写入权限\n"
-                f"  2. 磁盘空间是否充足\n"
-                f"  3. 使用 --force 强制重新生成"
+                f"HTML file generation failed, file does not exist: {html_file}\n"
+                f"Output directory: {html_file.parent}\n"
+                f"Please check:\n"
+                f"  1. Does edp_center/tutorial/ directory have write permission?\n"
+                f"  2. Is disk space sufficient?\n"
+                f"  3. Use --force to force regeneration"
             )
-        print(f"✅ 教程 HTML 已更新: {html_file}")
+        print(f"[OK] Tutorial HTML updated: {html_file}")
     else:
         # 普通用户：直接打开已存在的 HTML 文件
         if not html_file.exists():
-            print(f"⚠️  教程 HTML 文件不存在: {html_file}", file=sys.stderr)
-            print(f"💡 提示: 请联系 PM 更新教程，或使用 `edp -tutor --update` 更新（需要 edp_center 写入权限）", file=sys.stderr)
-            raise FileNotFoundError(f"教程 HTML 文件不存在: {html_file}")
+            print(f"[WARN] Tutorial HTML file does not exist: {html_file}", file=sys.stderr)
+            print(f"[INFO] Please contact PM to update tutorial, or use `edp -tutor --update` (requires edp_center write permission)", file=sys.stderr)
+            raise FileNotFoundError(f"Tutorial HTML file does not exist: {html_file}")
     
     # 在浏览器中打开
     file_url = html_file.as_uri()
     
     if browser:
         # 指定浏览器
-        print(f"🌐 正在使用 {browser} 打开: {file_url}")
+        print(f"[INFO] Opening with {browser}: {file_url}")
         try:
             system = platform.system()
             if system == 'Linux':
@@ -74,12 +75,12 @@ def open_tutorial_in_browser(edp_center_path: Path, update: bool = False, force:
                 # 其他系统，使用 webbrowser 模块
                 webbrowser.get(browser).open(file_url)
         except Exception as e:
-            print(f"⚠️  无法使用指定的浏览器 {browser}: {e}", file=sys.stderr)
-            print("   尝试使用系统默认浏览器...", file=sys.stderr)
+            print(f"[WARN] Cannot use specified browser {browser}: {e}", file=sys.stderr)
+            print("   Trying system default browser...", file=sys.stderr)
             webbrowser.open(file_url)
     else:
         # 使用系统默认浏览器
-        print(f"🌐 正在浏览器中打开: {file_url}")
+        print(f"[INFO] Opening in browser: {file_url}")
         system = platform.system()
         if system == 'Windows':
             # Windows: 优先尝试现代浏览器，避免使用 IE
@@ -102,7 +103,7 @@ def open_tutorial_in_browser(edp_center_path: Path, update: bool = False, force:
                 if os.path.exists(browser_path):
                     try:
                         subprocess.Popen([browser_path, file_url], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-                        print(f"   使用 {browser_name} 打开", file=sys.stderr)
+                        print(f"   Using {browser_name}", file=sys.stderr)
                         browser_found = True
                         break
                     except Exception:
@@ -144,9 +145,10 @@ def open_tutorial_directory(edp_center_path: Path):
     else:  # Linux
         subprocess.Popen(['xdg-open', str(tutorial_dir)])
     
-    print(f"📁 已打开教程目录: {tutorial_dir}")
+    print(f"[OK] Tutorial directory opened: {tutorial_dir}")
 
 
+@handle_cli_error(error_message="执行 tutorial 命令失败")
 def handle_tutorial_cmd(edp_center_path: Path, args) -> int:
     """
     处理教程命令
@@ -169,7 +171,7 @@ def handle_tutorial_cmd(edp_center_path: Path, args) -> int:
     # 检查是否有 --force 选项（强制重新生成，需要 --update）
     force = hasattr(args, 'force') and args.force
     if force and not update:
-        print("⚠️  警告: --force 选项需要配合 --update 使用，已忽略", file=sys.stderr)
+        print("[WARN] --force option requires --update, ignoring", file=sys.stderr)
         force = False
     
     # 检查是否有 --browser 选项（指定浏览器）

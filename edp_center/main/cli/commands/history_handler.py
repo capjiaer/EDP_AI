@@ -12,7 +12,8 @@ from pathlib import Path
 from datetime import datetime
 from typing import List, Dict, Optional, Any, Tuple
 
-from ..utils import infer_work_path_info, infer_project_info
+from ..utils import infer_all_info, build_branch_dir
+from edp_center.packages.edp_common.error_handler import handle_cli_error
 
 
 def load_run_history(branch_dir: Path) -> List[Dict[str, Any]]:
@@ -314,6 +315,7 @@ def _display_statistics(runs: List[Dict[str, Any]]) -> None:
     print("", file=sys.stderr)
 
 
+@handle_cli_error(error_message="查询历史记录失败")
 def handle_history_cmd(manager, args) -> int:
     """
     处理 -history 命令
@@ -325,35 +327,10 @@ def handle_history_cmd(manager, args) -> int:
     Returns:
         退出代码（0 表示成功，非 0 表示失败）
     """
-    try:
-        # 获取当前工作目录
-        current_dir = Path.cwd().resolve()
-        
-        # 推断项目信息
-        project_info = infer_project_info(manager, current_dir, args)
-        if not project_info:
-            print(f"[ERROR] 无法推断项目信息，请确保在正确的工作目录下运行", file=sys.stderr)
-            print(f"[INFO] 或者手动指定: --edp-center, --project, --foundry, --node", file=sys.stderr)
-            return 1
-        
-        # 推断工作路径信息
-        work_path_info = infer_work_path_info(current_dir, args, project_info)
-        if not work_path_info or not work_path_info.get('work_path') or \
-           not work_path_info.get('project') or not work_path_info.get('version') or \
-           not work_path_info.get('block') or not work_path_info.get('user') or \
-           not work_path_info.get('branch'):
-            print(f"[ERROR] 无法推断工作路径信息，请确保在正确的工作目录下运行", file=sys.stderr)
-            print(f"[INFO] 或者手动指定: --work-path, --project, --version, --block, --user, --branch", file=sys.stderr)
-            return 1
-        
-        # 构建 branch 目录路径
-        work_path = Path(work_path_info['work_path']).resolve()
-        project = work_path_info['project']
-        version = work_path_info['version']
-        block = work_path_info['block']
-        user = work_path_info['user']
-        branch = work_path_info['branch']
-        branch_dir = work_path / project / version / block / user / branch
+    # 推断所有信息（项目信息、工作路径信息、branch 目录）
+    project_info, work_path_info, branch_dir = infer_all_info(manager, args)
+    if not project_info or not work_path_info or not branch_dir:
+        return 1
         
         if not branch_dir.exists():
             print(f"[ERROR] 分支目录不存在: {branch_dir}", file=sys.stderr)
@@ -384,14 +361,8 @@ def handle_history_cmd(manager, args) -> int:
             limit=limit
         )
         
-        # 显示历史记录
-        display_history(filtered_runs, step_filter=step_filter)
-        
-        return 0
-        
-    except Exception as e:
-        print(f"[ERROR] 查询历史记录失败: {e}", file=sys.stderr)
-        import traceback
-        traceback.print_exc()
-        return 1
+    # 显示历史记录
+    display_history(filtered_runs, step_filter=step_filter)
+    
+    return 0
 

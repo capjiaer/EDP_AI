@@ -172,7 +172,16 @@ def create_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         '--index',
         type=int,
-        help='回滚到指定的历史记录索引（用于 -rollback 选项）'
+        dest='rollback_index',
+        help='回滚到指定的历史记录索引（用于 -rollback 选项，索引从1开始，1表示最近一次）'
+    )
+    parser.add_argument(
+        '--compare-index',
+        type=int,
+        nargs=2,
+        metavar=('INDEX1', 'INDEX2'),
+        dest='compare_indices',
+        help='对比指定的两个历史记录索引（用于 -rollback 选项，例如: --compare-index 1 3）'
     )
     parser.add_argument(
         '--to-time',
@@ -183,7 +192,20 @@ def create_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         '--dry-run',
         action='store_true',
+        dest='rollback_dry_run',
         help='预览回滚操作，不实际执行（用于 -rollback 选项）'
+    )
+    parser.add_argument(
+        '--preview',
+        action='store_true',
+        dest='rollback_dry_run',
+        help='预览回滚操作，不实际执行（用于 -rollback 选项，等同于 --dry-run）'
+    )
+    parser.add_argument(
+        '--compare-branch',
+        type=str,
+        dest='compare_branch',
+        help='跨 branch 对比配置差异（用于 -rollback 选项，指定要对比的 branch 名称）'
     )
     
     # ==================== -validate 选项（新增） ====================

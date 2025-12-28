@@ -22,9 +22,10 @@ edp_center_root = test_file_dir.parent.parent.parent.parent
 sys.path.insert(0, str(edp_center_root))
 
 from main.cli.cli import main
-from main.cli.arg_parser import create_parser
+from main.cli.arg_parser.main import create_parser
 from main.cli.command_router import create_manager, find_edp_center_path
 from main.workflow_manager import WorkflowManager
+from main.cli.commands.tests.test_helpers import TestFixture, create_test_args, create_test_project_structure, create_test_run_info
 
 
 class TestCLIIntegration(unittest.TestCase):
@@ -191,6 +192,50 @@ class TestCLIIntegration(unittest.TestCase):
         args = parser.parse_args(['--foundry', 'SAMSUNG', '--node', 'S8'])
         self.assertEqual(args.foundry, 'SAMSUNG')
         self.assertEqual(args.node, 'S8')
+    
+    def test_history_command_args(self):
+        """测试 -history 命令参数解析"""
+        parser = create_parser()
+        
+        # 测试无参数
+        args = parser.parse_args(['-history'])
+        self.assertIsNone(args.history)
+        
+        # 测试带参数
+        args = parser.parse_args(['-history', 'pv_calibre.ipmerge'])
+        self.assertEqual(args.history, 'pv_calibre.ipmerge')
+    
+    def test_stats_command_args(self):
+        """测试 -stats 命令参数解析"""
+        parser = create_parser()
+        
+        # 测试无参数
+        args = parser.parse_args(['-stats'])
+        self.assertIsNone(args.stats)
+        
+        # 测试带参数
+        args = parser.parse_args(['-stats', 'pnr_innovus.place'])
+        self.assertEqual(args.stats, 'pnr_innovus.place')
+    
+    def test_rollback_command_args(self):
+        """测试 -rollback 命令参数解析"""
+        parser = create_parser()
+        
+        # 测试基本 rollback
+        args = parser.parse_args(['-rollback'])
+        self.assertTrue(args.rollback)
+        
+        # 测试 --preview
+        args = parser.parse_args(['-rollback', '--preview'])
+        self.assertTrue(args.rollback_dry_run)
+        
+        # 测试 --index
+        args = parser.parse_args(['-rollback', '--index', '2'])
+        self.assertEqual(args.index, 2)
+        
+        # 测试 --compare-index
+        args = parser.parse_args(['-rollback', '--compare-index', '1', '3'])
+        self.assertEqual(args.compare_indices, [1, 3])
 
 
 if __name__ == '__main__':

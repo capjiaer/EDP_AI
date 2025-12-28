@@ -160,7 +160,7 @@ def generate_tutorial_html(edp_center_path: Path, output_dir: Optional[Path] = N
     if not need_update:
         # 再次验证文件确实存在（防止文件在检查后被删除）
         if output_file.exists():
-            print(f"ℹ️  教程已是最新: {output_file}")
+            print(f"[INFO] 教程已是最新: {output_file}")
             return output_file
         else:
             # 文件不存在，需要生成
@@ -235,9 +235,9 @@ def generate_tutorial_html(edp_center_path: Path, output_dir: Optional[Path] = N
     
     # 写入文件
     output_file.write_text(html_content, encoding='utf-8')
-    print(f"✅ 已生成教程单页应用: {output_file}")
-    print(f"📁 HTML 文件位置: {output_dir}")
-    print(f"💡 提示: HTML 文件生成在用户可写目录，不会修改 edp_center 目录")
+    print(f"[OK] Tutorial HTML generated: {output_file}")
+    print(f"[INFO] HTML file location: {output_dir}")
+    print(f"[INFO] Note: HTML file is generated in user-writable directory, will not modify edp_center directory")
     
     return output_file
 

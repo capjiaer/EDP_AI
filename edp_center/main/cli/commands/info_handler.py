@@ -19,6 +19,7 @@ from ..utils import (
 )
 from .common_handlers import show_project_list
 from edp_center.packages.edp_cmdkit.sub_steps import read_sub_steps_from_dependency
+from edp_center.packages.edp_common.error_handler import handle_cli_error
 
 
 def get_step_execution_status(branch_dir: Path, flow_name: str, step_name: str) -> tuple:
@@ -224,6 +225,7 @@ def show_flow_status(manager, edp_center_path, foundry, node, project, flow_name
         return False
 
 
+@handle_cli_error(error_message="执行 info 命令失败")
 def handle_info_cmd(manager, args) -> int:
     """
     处理 -info 命令，显示指定 flow 下所有 step 的状态
@@ -235,94 +237,83 @@ def handle_info_cmd(manager, args) -> int:
     Returns:
         退出代码（0 表示成功，非 0 表示失败）
     """
-    try:
-        # 处理 nargs='?' 的情况（args.info 可能是 None、字符串或列表）
-        if args.info is None:
-            flow_name = None
-        elif isinstance(args.info, list):
-            flow_name = args.info[0] if args.info else None
-        else:
-            flow_name = args.info
-        
-        # 获取当前工作目录
-        current_dir = Path.cwd().resolve()
-        
-        # 推断项目信息
-        project_info = infer_project_info(manager, current_dir, args)
-        if not project_info:
-            print(f"[ERROR] 无法推断项目信息，请确保在正确的工作目录下运行", file=sys.stderr)
-            print(f"[INFO] 或者手动指定: --edp-center, --project, --foundry, --node", file=sys.stderr)
-            
-            # 显示支持的 project 列表
-            show_project_list(manager, current_dir, args)
-            
-            return 1
-        
-        edp_center_path = project_info['edp_center_path']
-        foundry = project_info['foundry']
-        node = project_info['node']
-        project = project_info.get('project')
-        
-        # 获取所有可用的 flow
-        available_flows = list_available_flows(edp_center_path, foundry, node, project)
-        
-        # 如果没有提供 flow_name，显示所有 flow
-        if flow_name is None:
-            print(f"[INFO] 可用的 flow:", file=sys.stderr)
-            if available_flows:
-                for flow in sorted(available_flows.keys()):
-                    steps_info = available_flows[flow]
-                    ready_steps = [step for step, info in steps_info.items() if info.get('ready', False)]
-                    not_ready_steps = [step for step, info in steps_info.items() if not info.get('ready', False)]
-                    
-                    if ready_steps:
-                        ready_str = ', '.join(sorted(ready_steps))
-                        print(f"  {flow}: {ready_str}", file=sys.stderr)
-                    if not_ready_steps:
-                        not_ready_str = ', '.join(sorted(not_ready_steps))
-                        print(f"  {flow} (未就绪): {not_ready_str}", file=sys.stderr)
-            else:
-                print(f"  (未找到可用的 flow)", file=sys.stderr)
-            return 0
-        
-        # 如果提供了 flow_name，显示该 flow 的所有 step 信息
-        if flow_name not in available_flows:
-            print(f"[ERROR] Flow '{flow_name}' 不存在", file=sys.stderr)
-            print(f"\n[INFO] 可用的 flow:", file=sys.stderr)
-            if available_flows:
-                for flow in sorted(available_flows.keys()):
-                    print(f"  {flow}", file=sys.stderr)
-            else:
-                print(f"  (未找到可用的 flow)", file=sys.stderr)
-            return 1
-        
-        # 尝试推断工作路径信息（如果可能）
-        branch_dir = None
-        try:
-            work_path_info = infer_work_path_info(current_dir, args, project_info)
-            if work_path_info and work_path_info.get('work_path') and work_path_info.get('project') and \
-               work_path_info.get('version') and work_path_info.get('block') and \
-               work_path_info.get('user') and work_path_info.get('branch'):
-                from pathlib import Path
-                work_path = Path(work_path_info['work_path']).resolve()
-                project = work_path_info['project']
-                version = work_path_info.get('version')
-                block = work_path_info['block']
-                user = work_path_info['user']
-                branch = work_path_info['branch']
-                branch_dir = work_path / project / version / block / user / branch
-        except Exception:
-            # 如果推断失败，继续使用 None（只显示配置状态）
-            pass
-        
-        # 使用辅助函数显示 flow 状态
-        show_flow_status(manager, edp_center_path, foundry, node, project, flow_name, branch_dir=branch_dir)
-        
-        return 0
-        
-    except Exception as e:
-        print(f"[ERROR] 显示 flow 信息失败: {e}", file=sys.stderr)
-        import traceback
-        traceback.print_exc()
+    # 处理 nargs='?' 的情况（args.info 可能是 None、字符串或列表）
+    if args.info is None:
+        flow_name = None
+    elif isinstance(args.info, list):
+        flow_name = args.info[0] if args.info else None
+    else:
+        flow_name = args.info
+    
+    # 获取当前工作目录
+    current_dir = get_current_dir()
+    
+    # 推断项目信息
+    project_info = infer_and_validate_project_info(manager, current_dir, args)
+    if not project_info:
+        # 显示支持的 project 列表
+        show_project_list(manager, current_dir, args)
         return 1
+    
+    edp_center_path = project_info['edp_center_path']
+    foundry = project_info['foundry']
+    node = project_info['node']
+    project = project_info.get('project')
+    
+    # 获取所有可用的 flow
+    available_flows = list_available_flows(edp_center_path, foundry, node, project)
+    
+    # 如果没有提供 flow_name，显示所有 flow
+    if flow_name is None:
+        print(f"[INFO] 可用的 flow:", file=sys.stderr)
+        if available_flows:
+            for flow in sorted(available_flows.keys()):
+                steps_info = available_flows[flow]
+                ready_steps = [step for step, info in steps_info.items() if info.get('ready', False)]
+                not_ready_steps = [step for step, info in steps_info.items() if not info.get('ready', False)]
+                
+                if ready_steps:
+                    ready_str = ', '.join(sorted(ready_steps))
+                    print(f"  {flow}: {ready_str}", file=sys.stderr)
+                if not_ready_steps:
+                    not_ready_str = ', '.join(sorted(not_ready_steps))
+                    print(f"  {flow} (未就绪): {not_ready_str}", file=sys.stderr)
+        else:
+            print(f"  (未找到可用的 flow)", file=sys.stderr)
+        return 0
+    
+    # 如果提供了 flow_name，显示该 flow 的所有 step 信息
+    if flow_name not in available_flows:
+        print(f"[ERROR] Flow '{flow_name}' 不存在", file=sys.stderr)
+        print(f"\n[INFO] 可用的 flow:", file=sys.stderr)
+        if available_flows:
+            for flow in sorted(available_flows.keys()):
+                print(f"  {flow}", file=sys.stderr)
+        else:
+            print(f"  (未找到可用的 flow)", file=sys.stderr)
+        return 1
+    
+    # 尝试推断工作路径信息（如果可能）
+    branch_dir = None
+    try:
+        work_path_info = infer_work_path_info(current_dir, args, project_info)
+        if work_path_info and work_path_info.get('work_path') and work_path_info.get('project') and \
+           work_path_info.get('version') and work_path_info.get('block') and \
+           work_path_info.get('user') and work_path_info.get('branch'):
+            from pathlib import Path
+            work_path = Path(work_path_info['work_path']).resolve()
+            project = work_path_info['project']
+            version = work_path_info.get('version')
+            block = work_path_info['block']
+            user = work_path_info['user']
+            branch = work_path_info['branch']
+            branch_dir = work_path / project / version / block / user / branch
+    except Exception:
+        # 如果推断失败，继续使用 None（只显示配置状态）
+        pass
+    
+    # 使用辅助函数显示 flow 状态
+    show_flow_status(manager, edp_center_path, foundry, node, project, flow_name, branch_dir=branch_dir)
+    
+    return 0
 

@@ -9,7 +9,7 @@ EDP Main CLI - 统一的命令行接口
 
 import sys
 
-from .arg_parser import create_parser
+from .arg_parser.main import create_parser
 from .command_router import route_subcommands
 
 # 初始化日志系统
