@@ -1,8 +1,0 @@
-pv_calibre:
-  dependency:
-    FP_MODE:
-    - drc:
-        cmd: calibre_drc.tcl
-        in: []
-        out:
-        - drc.pass

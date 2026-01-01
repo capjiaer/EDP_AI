@@ -1,5 +1,0 @@
-pv_calibre:
-  drc:
-    cmd: echo 'DRC check'
-    lsf: 0
-    tool_opt: bash
