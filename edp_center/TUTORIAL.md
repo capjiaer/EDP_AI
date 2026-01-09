@@ -4,31 +4,33 @@
 
 ## 📚 目录
 
-1. [快速开始](tutorial/01_quick_start.md) - 安装、配置和创建第一个项目
-2. [核心概念](tutorial/02_core_concepts.md) - 目录结构、四个核心 KIT、配置文件层级
-3. [基本操作](tutorial/03_basic_operations.md) - 项目初始化、创建分支、运行流程、查看信息、Debug 模式
-4. [高级功能](tutorial/04_advanced_features.md) - Flow 类型选择、配置文件管理、自动生成的变量、LSF 作业管理、脚本文件类型支持
+1. [框架介绍](tutorial/00_introduction.md) - EDP_AI 框架概述、架构和核心功能
+2. [安装指南](tutorial/01_installation.md) - 框架安装和环境配置
+3. [快速开始](tutorial/02_getting_started.md) - 创建第一个项目和运行流程
+4. [基本使用](tutorial/03_basic_usage.md) - 目录结构、基本命令和配置文件基础
 5. [Hooks 机制和 #import 指令](tutorial/04_hooks_and_imports.md) - Hooks 机制详解、`#import source` 指令
-6. [Sub_steps 机制和 Debug 模式](tutorial/04_sub_steps_and_debug.md) - Sub_steps 机制详解、Debug 模式交互式调试
-7. [最佳实践](tutorial/07_best_practices.md) - 项目组织、配置管理、脚本开发、调试技巧
-8. [常见问题](tutorial/08_faq.md) - FAQ 和故障排除
-9. [RELEASE 功能](tutorial/10_release.md) - 发布和共享运行结果
-10. [更多资源](tutorial/09_resources.md) - 学习路径和获取帮助
+6. [Sub_steps 机制和 Debug 模式](tutorial/05_sub_steps_and_debug.md) - Sub_steps 机制详解、Debug 模式交互式调试
+7. [配置文件高级用法](tutorial/06_configuration.md) - YAML/Tcl 格式、变量保护、变量约束、LSF 作业管理
+8. [最佳实践](tutorial/07_best_practices.md) - 项目组织、配置管理、脚本开发、调试技巧
+9. [常见问题](tutorial/08_faq.md) - FAQ 和故障排除
+10. [RELEASE 功能](tutorial/10_release.md) - 发布和共享运行结果
+11. [更多资源](tutorial/09_resources.md) - 学习路径和获取帮助
 
 ---
 
 ## 🚀 快速导航
 
 ### 新手入门
-- 第一次使用？从 [快速开始](tutorial/01_quick_start.md) 开始
-- 想了解框架架构？查看 [核心概念](tutorial/02_core_concepts.md)
-- 需要实际操作？参考 [基本操作](tutorial/03_basic_operations.md)
+- 第一次使用？先查看 [框架介绍](tutorial/00_introduction.md) 了解框架概况
+- 需要安装框架？参考 [安装指南](tutorial/01_installation.md)
+- 想快速上手？从 [快速开始](tutorial/02_getting_started.md) 开始创建第一个项目
+- 需要了解基本概念？查看 [基本使用](tutorial/03_basic_usage.md)
 
 ### 进阶学习
-- 想使用高级功能？查看：
-  - [高级功能](tutorial/04_advanced_features.md) - Flow 类型选择、配置文件管理、LSF 作业管理
-  - [Hooks 机制和 #import 指令](tutorial/04_hooks_and_imports.md) - Hooks 机制详解、`#import` 指令使用
-  - [Sub_steps 机制和 Debug 模式](tutorial/05_sub_steps_and_debug.md) - Sub_steps 机制、Debug 模式交互式调试
+- 想深入了解功能？查看：
+  - [Hooks 机制和 #import 指令](tutorial/04_hooks_and_imports.md) - 扩展和定制机制
+  - [Sub_steps 机制和 Debug 模式](tutorial/05_sub_steps_and_debug.md) - 高级调试功能
+  - [配置文件高级用法](tutorial/06_configuration.md) - 高级配置管理
   - [RELEASE 功能](tutorial/10_release.md) - 发布和共享运行结果
 - 需要最佳实践指导？参考 [最佳实践](tutorial/07_best_practices.md)
 - 遇到问题？查看 [常见问题](tutorial/08_faq.md)

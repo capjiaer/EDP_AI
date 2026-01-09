@@ -1,0 +1,20 @@
+graph TD
+    A[EDP_AI Framework] --> B[WorkflowManager<br/>统一工作流管理接口]
+
+    B --> C[edp_dirkit<br/>目录管理<br/>工作空间初始化]
+    B --> D[edp_configkit<br/>配置加载<br/>YAML↔Tcl转换]
+    B --> E[edp_cmdkit<br/>脚本处理<br/>#import展开]
+    B --> F[edp_flowkit<br/>工作流执行<br/>依赖管理]
+    B --> G[edp_libkit<br/>库配置生成<br/>Foundry适配]
+    B --> H[edp_common<br/>公共工具<br/>异常处理]
+    B --> I[edp_webkit<br/>Web服务<br/>FastAPI接口]
+
+    style A fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    style B fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    style C fill:#f3e5f5,stroke:#6a1b9a
+    style D fill:#f3e5f5,stroke:#6a1b9a
+    style E fill:#f3e5f5,stroke:#6a1b9a
+    style F fill:#f3e5f5,stroke:#6a1b9a
+    style G fill:#f3e5f5,stroke:#6a1b9a
+    style H fill:#e8f5e8,stroke:#2e7d32
+    style I fill:#e8f5e8,stroke:#2e7d32

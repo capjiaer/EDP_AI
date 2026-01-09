@@ -24,15 +24,19 @@ WorkflowManager
     ├── edp_configkit (无依赖)
     ├── edp_cmdkit
     │   └── edp_configkit
-    └── edp_flowkit
-        └── edp_cmdkit
-            └── edp_configkit
+    ├── edp_flowkit
+    │   └── edp_cmdkit
+    │       └── edp_configkit
+    ├── edp_libkit (无依赖)
+    ├── edp_common (无依赖)
+    └── edp_webkit
+        └── edp_common
 ```
 
 ### 1.2 依赖层次
 
-- **第 0 层（无依赖）**: `edp_dirkit`, `edp_configkit`
-- **第 1 层（依赖第 0 层）**: `edp_cmdkit`
+- **第 0 层（无依赖）**: `edp_dirkit`, `edp_configkit`, `edp_libkit`, `edp_common`
+- **第 1 层（依赖第 0 层）**: `edp_cmdkit`, `edp_webkit`
 - **第 2 层（依赖第 1 层）**: `edp_flowkit`
 - **第 3 层（依赖所有层）**: `WorkflowManager`
 
@@ -129,7 +133,7 @@ WorkflowManager
 - GUI 应用
 - Web API
 
-**说明**: `WorkflowManager` 整合四个 KIT，提供统一接口。
+**说明**: `WorkflowManager` 整合七个核心模块，提供统一接口。
 
 ---
 

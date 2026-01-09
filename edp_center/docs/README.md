@@ -137,6 +137,8 @@ docs/
 - **edp_cmdkit**：脚本处理相关文档
 - **edp_flowkit**：工作流执行相关文档
 - **edp_libkit**：库配置生成相关文档
+- **edp_common**：公共工具相关文档
+- **edp_webkit**：Web服务和界面相关文档
 
 ---
 

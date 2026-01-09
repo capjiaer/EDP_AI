@@ -24,34 +24,56 @@
 
 ## 架构概览
 
-EDP_AI 框架由五个核心 KIT 组成，每个 KIT 负责不同的功能：
+EDP_AI 框架由七个核心模块组成，每个模块负责不同的功能：
 
-```
-                    ┌─────────────────────────────────────┐
-                    │         EDP_AI Framework            │
-                    └─────────────────────────────────────┘
-                                          │
-        ┌─────────────────────────────────┼─────────────────────────────────┐
-        │         │         │         │         │                           │
-        ▼         ▼         ▼         ▼         ▼                           ▼
-┌──────────────┐ ┌──────────────┐ ┌──────────────┐ ┌──────────────┐ ┌──────────────┐
-│ edp_dirkit   │ │edp_configkit │ │  edp_cmdkit  │ │ edp_flowkit  │ │ edp_libkit   │
-├──────────────┤ ├──────────────┤ ├──────────────┤ ├──────────────┤ ├──────────────┤
-│ Dir Mgmt     │ │ Config Load  │ │ Script Proc  │ │ Flow Exec    │ │ Lib Config   │
-│ Workspace    │ │ Config Merge │ │ #import      │ │ Dep Mgmt     │ │ Generation   │
-│ Init         │ │ YAML↔Tcl     │ │ Expand       │ │              │ │              │
-└──────┬───────┘ └──────┬───────┘ └──────┬───────┘ └──────┬───────┘ └──────┬───────┘
-       │                │                │                │                │
-       └────────────────┴────────────────┴────────────────┴────────────────┘
-                                      │
-                                      ▼
-                    ┌─────────────────────────────┐
-                    │    WorkflowManager          │
-                    │  Unified Workflow Interface │
-                    └─────────────────────────────┘
+![EDP_AI框架架构图](images/architecture_diagram.png)
+
+<!-- Mermaid代码用于将来更新图片，请勿删除
+```mermaid
+graph TD
+    A[EDP_AI Framework] --> B[WorkflowManager<br/>统一工作流管理接口]
+
+    B --> C[edp_dirkit<br/>目录管理<br/>工作空间初始化]
+    B --> D[edp_configkit<br/>配置加载<br/>YAML↔Tcl转换]
+    B --> E[edp_cmdkit<br/>脚本处理<br/>#import展开]
+    B --> F[edp_flowkit<br/>工作流执行<br/>依赖管理]
+    B --> G[edp_libkit<br/>库配置生成<br/>Foundry适配]
+    B --> H[edp_common<br/>公共工具<br/>异常处理]
+    B --> I[edp_webkit<br/>Web服务<br/>FastAPI接口]
+
+    style A fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    style B fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    style C fill:#f3e5f5,stroke:#6a1b9a
+    style D fill:#f3e5f5,stroke:#6a1b9a
+    style E fill:#f3e5f5,stroke:#6a1b9a
+    style F fill:#f3e5f5,stroke:#6a1b9a
+    style G fill:#f3e5f5,stroke:#6a1b9a
+    style H fill:#e8f5e8,stroke:#2e7d32
+    style I fill:#e8f5e8,stroke:#2e7d32
 ```
 
-### 五个核心 KIT
+PNG生成命令：
+```bash
+mmdc -i architecture_diagram.mmd -o edp_center/docs/images/architecture_diagram.png -t default -b white
+```
+-->
+
+**架构图说明：**
+- **蓝色节点**：EDP_AI框架总入口
+- **橙色节点**：WorkflowManager统一管理接口
+- **紫色节点**：核心功能模块（dirkit, configkit, cmdkit, flowkit, libkit）
+- **绿色节点**：辅助工具模块（common, webkit）
+
+**核心模块功能：**
+- **edp_dirkit**：目录管理、工作空间初始化
+- **edp_configkit**：配置加载、YAML↔Tcl格式转换
+- **edp_cmdkit**：脚本处理、#import指令展开、Hooks机制
+- **edp_flowkit**：工作流执行、依赖关系管理
+- **edp_libkit**：库配置文件生成、Foundry适配
+- **edp_common**：公共工具、统一异常处理、日志系统
+- **edp_webkit**：Web服务、FastAPI接口、指标监控
+
+### 七个核心模块
 
 1. **edp_dirkit** - 目录管理和工作空间初始化
    - 创建项目目录结构
@@ -74,10 +96,22 @@ EDP_AI 框架由五个核心 KIT 组成，每个 KIT 负责不同的功能：
    - 按依赖顺序执行步骤
 
 5. **edp_libkit** - 库配置生成工具
-   - 从分散的库文件中收集配置信息
-   - 生成统一的 `lib_config.tcl` 配置文件
-   - 支持多种 foundry（Samsung、SMIC、TSMC）和库类型（STD、IP、MEM）
-   - 支持批量处理和版本管理
+    - 从分散的库文件中收集配置信息
+    - 生成统一的 `lib_config.tcl` 配置文件
+    - 支持多种 foundry（Samsung、SMIC、TSMC）和库类型（STD、IP、MEM）
+    - 支持批量处理和版本管理
+
+6. **edp_common** - 公共工具模块
+    - 统一的异常处理系统（EDPError体系）
+    - 错误处理装饰器和上下文管理器
+    - 日志记录辅助函数
+    - 通用工具函数
+
+7. **edp_webkit** - Web服务和界面模块
+    - 基于FastAPI的Web服务
+    - 指标收集和监控接口
+    - Web界面支持（开发中）
+    - RESTful API接口
 
 ---
 

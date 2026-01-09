@@ -4,18 +4,21 @@
 """
 WorkflowManager - 工作流管理器
 
-整合四个 KIT，提供统一的工作流管理接口：
+整合七个核心模块，提供统一的工作流管理接口：
 1. edp_dirkit - 环境初始化
 2. edp_configkit - 配置加载
 3. edp_cmdkit - 脚本处理
 4. edp_flowkit - 工作流执行
+5. edp_libkit - 库配置生成
+6. edp_common - 公共工具
+7. edp_webkit - Web服务
 """
 
 import sys
 from pathlib import Path
 from typing import Optional, List, Dict, Union, Any
 
-# 导入四个 KIT
+# 导入七个核心模块
 from edp_center.packages.edp_dirkit import ProjectInitializer, WorkPathInitializer
 from edp_center.packages.edp_configkit import files2dict
 from edp_center.packages.edp_cmdkit import CmdProcessor
@@ -23,7 +26,7 @@ from edp_center.packages.edp_flowkit.flowkit import Graph, execute_all_steps, IC
 
 
 class WorkflowManager:
-    """工作流管理器 - 整合四个 KIT"""
+    """工作流管理器 - 整合七个核心模块"""
     
     def __init__(self, edp_center_path: Union[str, Path]):
         """
@@ -290,7 +293,7 @@ class WorkflowManager:
                          from_branch_step: Optional[str] = None,
                          prepend_default_sources: bool = True) -> Dict[str, Any]:
         """
-        运行完整工作流（整合四个 KIT）
+        运行完整工作流（整合七个核心模块）
         
         流程：
         1. 初始化用户工作空间（edp_dirkit）

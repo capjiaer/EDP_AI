@@ -2,7 +2,7 @@
 
 ## 📋 概述
 
-`WorkflowManager` 是 EDP_AI 框架的统一工作流管理接口，整合四个 KIT，提供简洁易用的 API。
+`WorkflowManager` 是 EDP_AI 框架的统一工作流管理接口，整合七个核心模块，提供简洁易用的 API。
 
 **位置**: `edp_center.main.workflow_manager.WorkflowManager`
 
@@ -231,7 +231,7 @@ results = manager.execute_workflow(
 
 ### `run_full_workflow(work_path, project, version, block, user, branch, flow, foundry=None, node=None, from_branch_step=None, prepend_default_sources=True)`
 
-运行完整工作流（整合四个 KIT）。
+运行完整工作流（整合七个核心模块）。
 
 **流程**:
 1. 初始化用户工作空间（edp_dirkit）

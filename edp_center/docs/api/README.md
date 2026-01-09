@@ -8,7 +8,7 @@
 
 1. **[WorkflowManager API](workflow_manager.md)**
    - 统一工作流管理接口
-   - 整合五个 KIT 的接口
+   - 整合七个核心模块的接口
 
 2. **[edp_dirkit API](edp_dirkit.md)**
    - 目录管理和工作空间初始化

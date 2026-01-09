@@ -98,12 +98,14 @@ edp_center/
 │   ├── cli/               # 命令行接口
 │   ├── workflow_manager.py
 │   └── tests/
-├── packages/              # 四个核心 KIT
+├── packages/              # 七个核心模块
 │   ├── edp_dirkit/
 │   ├── edp_configkit/
 │   ├── edp_cmdkit/
 │   ├── edp_flowkit/
-│   └── edp_common/
+│   ├── edp_libkit/        # 库配置生成工具
+│   ├── edp_common/        # 公共工具模块
+│   └── edp_webkit/        # Web服务和界面
 ├── tutorial/              # 教程文档
 └── docs/                  # 详细文档
 ```
@@ -111,10 +113,12 @@ edp_center/
 ### 模块职责
 
 - **edp_dirkit**: 目录管理和工作空间初始化
-- **edp_configkit**: 配置加载和合并
-- **edp_cmdkit**: 脚本处理和 #import 展开
-- **edp_flowkit**: 工作流执行和依赖管理
-- **edp_common**: 公共模块（异常、日志等）
+- **edp_configkit**: 配置加载和合并（YAML ↔ Tcl转换）
+- **edp_cmdkit**: 脚本处理和 #import 展开（Hooks 和 Sub_steps）
+- **edp_flowkit**: 工作流执行和依赖管理（Graph、Step、ICCommandExecutor）
+- **edp_libkit**: 库配置生成工具（LibConfigGenerator、FoundryAdapter）
+- **edp_common**: 公共工具模块（异常、日志、错误处理）
+- **edp_webkit**: Web服务和界面模块（FastAPI + 指标，开发中）
 
 ---
 
